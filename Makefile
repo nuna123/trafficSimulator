@@ -5,15 +5,13 @@ COMPILER = javac
 
 all: ${OUT_DIR}/Main.class
 
-${OUT_DIR}/Main.class: ${SRC_DIR}/Main.java
+${OUT_DIR}/Main.class: ${SRC_DIR}/*.java
 	@mkdir -p ${OUT_DIR}
 	${COMPILER} -d ${OUT_DIR} -cp ${SRC_DIR} ${SRC_DIR}/Main.java
 	@echo "Created ${OUT_DIR}/Main.class"
 
 
-
-
-run: ${NAME}
+run: 
 	@java -cp ${OUT_DIR} Main
 
 clean:

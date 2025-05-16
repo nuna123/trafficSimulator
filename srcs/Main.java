@@ -1,27 +1,9 @@
-import java.io.*;
 import java.util.*;
 
 public class Main {
 	private static String CONFIGFILE = "./config.properties";
 
-	public static void readConfigFile ()
-	{
-		try{
-			FileInputStream propsInput = new FileInputStream(CONFIGFILE);
-			Properties prop = new Properties();
-			prop.load(propsInput);
-	
-			System.out.print(prop);
-		}
-		catch ( FileNotFoundException e){System.out.print(e);}
-		catch (Exception e){System.out.print(e);}
-	}
-
-
-
-	public static void main(String[] args) {
-
-		System.out.println("Traffic Simulator started.");
+	static Map <String, Float>  getConfig(){
 		ConfigReader cr = null;
 		try {
 			cr = new ConfigReader(CONFIGFILE);
@@ -33,9 +15,28 @@ public class Main {
 		}
 		
 		cr.readConfigFile();
-		Map<String, Float> immod_mappedConf = cr.getMappedConfig();
+		return cr.getMappedConfig();
+	}
 
-		System.out.print(immod_mappedConf);
+	public static void main(String[] args) {
+
+		System.out.println("Traffic Simulator started.");
+		
+		Map <String, Float> config = getConfig();
+		System.out.println("CONFIG:" + config);
+
+		Road road = new Road(config.get("S"));
+		for (int i = 0;++i <= 10;){
+			if (i%2 == 0)
+				road.addCar(1);
+			else 
+				road.addCar(2);
+			}
+		
+		System.out.println("ROAD QUEUELEN: " + road.getQueueLen());
+		System.out.println( road.greenLight(config.get("X1")));
+		System.out.println("ROAD QUEUELEN: " + road.getQueueLen());
+
 
 
 	}
