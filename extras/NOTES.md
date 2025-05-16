@@ -10,3 +10,11 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 
 
 ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
+
+
+CLASSES:
+	ConfigReader
+		reads the config file, makes sure all values are valid and present. 
+		reads into a Map <String, Float>
+
+		
