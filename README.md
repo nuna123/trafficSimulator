@@ -1,4 +1,4 @@
-# trafficSimulator
+# Traffic Simulator
 Traffic Intersection Simulator - Green:Code Internship Assignment
 
 
@@ -21,6 +21,8 @@ Each road will have cars approaching it in set intervals.
 | `A3`     | Arrival interval of cars from **South** (Road 3) | seconds/car |
 | `A4`     | Arrival interval of cars from **West** (Road 4)  | seconds/car |
 
+## ASSUMPTIONS
 
-This project is made assuming there are no pedestrian crosswalks, and all cars are only going to the road across them, without turning.
-
+ - There are no pedestrian crosswalks
+ - All cars are only going to the road across them, without turning.
+ - A car will not start crossing the road if it doesnt have enough time to cross safely to the other side.

@@ -10,7 +10,7 @@ public class ConfigReader {
 
 	private String _filePath;
 	private Map<String, Float> _mappedConfig = null;
-	private List<String> _requiredKeys = Arrays.asList(
+	private static List<String> _requiredKeys = Arrays.asList(
 			"X1",
 			"X2",
 			"S",
@@ -39,22 +39,43 @@ public class ConfigReader {
 	}
 
 	/**
+	 * makes sure all required values are present.
+	 * validates value are valid
+	 * @param config	config Map to read from
+	 * @throws MissingKeyException
+	 * @throws InvalidValueException
+	 */
+	private void validateValues (Map<String, Float> config)
+				throws MissingKeyException, InvalidValueException
+	{
+		// check that all needed values exist
+		for (String key : _requiredKeys) {
+			if (!config.containsKey(key))
+				throw new MissingKeyException("Missing Key " + key + " in config file!");
+		}
+
+		// S cannot be larger than X1/X2, how would a car cross the road?
+		if (config.get("S") > config.get("X1")
+			|| config.get("S") > config.get("X2"))
+		{ throw new InvalidValueException ("S cannot be larger than X1/X2!"); }
+
+	}
+
+	/**
 	 * Converts the given Properties object to Map <String, Float>.
-	 * Checks that all entries in private _requiredKeys are present in the object.
+	 * Validates values using validateValues() function
 	 * 
 	 * @param properties The Properties object to convert from
 	 * @return Map<String, Float>
-	 * @throws Exception
+	 * @throws MissingKeyException (from ValidateValues)
+	 * @throws InvalidValueException (from ValidateValues)
 	 * @throws NumberFormatException
 	 */
 	private Map<String, Float> propertiesToMap(Properties properties)
-			throws MissingKeyException, NumberFormatException {
+			throws MissingKeyException, InvalidValueException, NumberFormatException {
 		Map<String, Float> floatMap = new HashMap<>();
 
-		for (String key : _requiredKeys) {
-			if (!properties.containsKey(key))
-				throw new MissingKeyException("Missing Key " + key + " in config file!");
-		}
+		
 		for (String key : properties.stringPropertyNames()) {
 			Float f;
 			try{f = Float.valueOf(properties.getProperty(key));}
@@ -63,7 +84,7 @@ public class ConfigReader {
 			}
 			floatMap.put(key, f);
 		}
-
+		validateValues(floatMap);
 		return floatMap;
 	}
 
@@ -92,11 +113,21 @@ public class ConfigReader {
 	}
 
 
+	// CUSTOM EXCEPTIONS
 	class MissingKeyException extends Exception {
 		public MissingKeyException(String message) {
 			super(message);
 		}
 		public MissingKeyException() {
+			super("A key is missing in the data set!");
+		}
+	}
+
+	class InvalidValueException extends Exception {
+		public InvalidValueException(String message) {
+			super(message);
+		}
+		public InvalidValueException() {
 			super("A key is missing in the data set!");
 		}
 	}
