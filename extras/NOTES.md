@@ -4,18 +4,18 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 NOTE : test road green light timing better, add documentation.
 
 ## TODO
-- [ ] Define Vehicle class
+- [x] Define Vehicle class NOTE: done as record in Road class
 	- [ ] OPTIONAL:  trucks? to be *2 size, (S), of regular cars
 
-- [ ] Road class
+- [x] Road class
 		will contain a queue of the cars
 			queue can be added and removed from in FIFO style
 		when prompted, will assert how many cars shall pass given the Phase - green light - time
 
-- [ ] RoadController class
+- [ ] JunctionController class
 	- [ ] Arr[4] of Roads
 	- [ ] light switching logic -
-				Limited by number of cars??? time???? both???? 
+				Limited by number of cars??? time???? both????
 				wait for car to arrive-> turn on phase A/B -> switch to other phase if needed
 				if no cars, no need to turn any lights on.
 	- BONUS
@@ -27,7 +27,7 @@ NOTE : test road green light timing better, add documentation.
 - [ ] Add diagrams - UML and Sequence/Activity diagram
 
 
-## CONFIG VARIABLES: 
+## CONFIG VARIABLES:
 - X1		Phase A length in sec
 - X2		Phase B length in sec
 - S			How long for a car to cross the road, in sec
@@ -39,9 +39,9 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 
 ## CLASSES:
 	ConfigReader
-		reads the config file, makes sure all values are valid and present. 
+		reads the config file, makes sure all values are valid and present.
 		reads into a Map <String, Float>
-	
+
 	## TODO
 	Road
 		will contain a queue of the cars

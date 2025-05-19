@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.*;
 
 public class Main {
 	private static String CONFIGFILE = "./config.properties";
@@ -25,22 +26,25 @@ public class Main {
 			System.out.println("config is null, exiting....");
 			return;
 		}
-
 		System.out.println("CONFIG:" + config);
 
-		Road road = new Road(config.get("S"));
-		for (int i = 0;++i <= 10;){
-			if (i%2 == 0)
-				road.addCar(1);
-			else
-				road.addCar(2);
-			}
 
-		System.out.println("ROAD QUEUELEN: " + road.getQueueLen());
-		System.out.println( road.greenLight(config.get("X1")));
-		System.out.println("ROAD QUEUELEN: " + road.getQueueLen());
+		JunctionController jc = new JunctionController(config);
 
+		try{
+			jc.addCar('N', 3);
+			jc.addCar('E', 2);
+			jc.addCar('S', 8);
+			jc.addCar('W', 13);
+		}
+		catch (Exception e){System.out.println(e);}
 
 
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+		Runnable task = () -> jc.tick();
+
+		int tickInterval = 1; //1sec
+
+		scheduler.scheduleAtFixedRate(task, 0, tickInterval, TimeUnit.SECONDS);
 	}
 }
