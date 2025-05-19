@@ -11,8 +11,10 @@ public class JunctionController {
 
 
 	private int phaseTimer = 0;
+	private	int time = 0;
 	private int currPhaseLen;
 
+	private int[] _carArrivals;
 
 	public Road[] getRoads (){return _roads;}
 	public Map<String, Integer> getConfig (){return (_config == null ? null : Collections.unmodifiableMap(_config));}
@@ -26,7 +28,9 @@ public class JunctionController {
 		for (int i = 0; i < 4; i++)
 			_roads[i] = new Road(_config.get("S"));
 
-
+		_carArrivals = new int[4];
+		for (int i = 1; i <=4; i++)
+			_carArrivals[i - 1] = _config.get("A" + String.valueOf(i));
 	}
 
 	public void addCar (char roadChar)
@@ -79,19 +83,22 @@ public class JunctionController {
 	//FUNCTION TO RUN EVERY SECOND
 	public void tick()
 	{
+
 		// System.out.println("Tick. Phase: " + _currentPhase);
 
 		//switch phases
 		phaseTimer ++;
+		time ++;
 
+		//handle phase switching
 		if (phaseTimer >= currPhaseLen)
 		{
 			switchPhase();
 			phaseTimer = 0;
 
-			System.out.println("---------------------------------------");
+			System.out.println("--------------"+time+"---------------------");
 			System.out.printf("Phase switched! new phase: %s\n", (_currentPhase == Phase.NS_GREEN ? "North -> South" : "West -> East"));
-			System.out.printf("Car Queues: \n\tNorth: %d\n\tWest: %d\n\tSouth: %d\n\tEast: %d\n",
+			System.out.printf("Car Queues: \n\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)\n",
 			_roads[0].getQueueLen(),
 			_roads[1].getQueueLen(),
 			_roads[2].getQueueLen(),
@@ -100,7 +107,17 @@ public class JunctionController {
 
 		}
 
+		//handle car arrivals
+		for (int idx = 0; idx < _carArrivals.length ; idx ++ )
+		{
 
+			if (time % _carArrivals[idx] == 0)
+			{
+				_roads[idx].addCar();
+				String[] dirs = {"North", "East", "South", "West"};
+				System.out.println(time + ": Car Arrived from " + dirs[idx]);
+			}
+		}
 
 	}
 }
