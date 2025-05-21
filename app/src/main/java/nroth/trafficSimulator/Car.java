@@ -8,10 +8,10 @@ public class Car {
 
 	public Car (int i, int len, float p, int s)
 	{
-		id = i;
-		length = len;
-		posInJunction = p;
-		S = s;
+		this.id = i;
+		this.length = len;
+		this.posInJunction = p;
+		this.S = s * len;
 	}
 
 	@Override public String toString() {

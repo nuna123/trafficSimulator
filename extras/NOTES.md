@@ -4,7 +4,7 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 NOTE : test road green light timing better, add documentation.
 
 ## TODO
-- [ ] Make car move across the road in real time!
+- [x] Make car move across the road in real time!
 - [x] Define Vehicle class NOTE: done as record in Road class
 	- [ ] OPTIONAL:  trucks? to be *2 size, (S), of regular cars
 
@@ -13,17 +13,18 @@ NOTE : test road green light timing better, add documentation.
 			queue can be added and removed from in FIFO style
 		when prompted, will assert how many cars shall pass given the Phase - green light - time
 
-- [ ] JunctionController class
+- [x] JunctionController class
 	- [ ] Arr[4] of Roads
 	- [ ] light switching logic -
-				Limited by number of cars??? time???? both????
+				Limit by number of cars??? time???? both????
 				wait for car to arrive-> turn on phase A/B -> switch to other phase if needed
 				if no cars, no need to turn any lights on.
 	- BONUS
 		-[ ] tcp connection on a separate thread to accept input.
 
-- [ ] Add Config validation for unreasonable values:
+- [x] Add Config validation for unreasonable values:
 	[x]- S cant be larger than X1/X2!
+
 - [ ] Write unit tests for Intersection
 - [ ] Add diagrams - UML and Sequence/Activity diagram
 

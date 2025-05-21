@@ -2,13 +2,12 @@ package nroth.trafficSimulator;
 
 import java.util.*;
 
-import javax.management.InstanceNotFoundException;
 
 public class JunctionController {
 	private Road[] _roads;
 	private Map<String, Integer> _config = null;
 
-	private enum PhaseValue { NS_GREEN, EW_GREEN }
+	public enum PhaseValue { NS_GREEN, EW_GREEN }
 	private JunctionPhase _currentPhase;
 
 	int time = 0;
@@ -20,6 +19,14 @@ public class JunctionController {
 
 	public Road[] getRoads (){return _roads;}
 	public Map<String, Integer> getConfig (){return (_config == null ? null : Collections.unmodifiableMap(_config));}
+	public Map<String, Object> getCurrPhase (){
+		return (_currentPhase == null ? null :
+		Map.ofEntries(Map.entry("phase", _currentPhase.phase.name()),
+				Map.entry("carsPassed", _currentPhase.carsPassed),
+				Map.entry("carsOnRoad", _currentPhase.carsOnRoad),
+				Map.entry("phaseTimer", _currentPhase.phaseTimer),
+				Map.entry("len", _currentPhase.len)
+				));}
 
 	public JunctionController(Map <String, Integer> config)
 	{
@@ -107,13 +114,13 @@ public class JunctionController {
 		}
 	}
 
-
 	public class JunctionPhase {
 		PhaseValue phase;
 		int len;
 		int phaseTimer;
 		int carsPassed;
 		int carsOnRoad;
+
 
 		public JunctionPhase(){
 			phase = PhaseValue.NS_GREEN;
@@ -124,14 +131,14 @@ public class JunctionController {
 		private int getPhaseLen()
 		{
 			return (this.phase == PhaseValue.NS_GREEN ? _config.get("X1") : _config.get("X2"));
-
 		}
 
 		public void switchPhase()
 		{
 			this.phase = (phase == PhaseValue.NS_GREEN ? PhaseValue.EW_GREEN : PhaseValue.NS_GREEN);
 			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
-		}
+			this.len = getPhaseLen();
+			}
 
 		public void update(Map <String, Integer> res1, Map <String, Integer> res2)
 		{
@@ -144,7 +151,7 @@ public class JunctionController {
 		}
 
 		@Override public String toString() {
-			return String.format("Phase: %s; timer: %d; carsPassed: %d; carsOnRoad: %d", this.phase.name(), this.phaseTimer, this.carsPassed, this.carsOnRoad);
+			return String.format("Phase: %s; len: %d;timer: %d; carsPassed: %d; carsOnRoad: %d", this.phase.name(),this.len, this.phaseTimer, this.carsPassed, this.carsOnRoad);
 		}
 
 	}
