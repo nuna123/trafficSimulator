@@ -1,7 +1,5 @@
 package nroth.trafficSimulator;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -16,6 +14,7 @@ public class App {
 		} catch (Exception e)
 		{
 			System.out.print(e);
+			return null;
 		}
 
 		return cr.getMappedConfig();
@@ -29,7 +28,7 @@ public class App {
 
 		Map <String, Integer> config = getConfig();
 		if (config == null){
-			System.out.println("config is null, exiting....");
+			System.out.println("\nconfig is null, exiting....");
 			return;
 		}
 		System.out.println("CONFIG:" + config);

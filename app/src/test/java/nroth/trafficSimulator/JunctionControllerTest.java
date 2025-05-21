@@ -6,8 +6,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-
-
 class JunctionControllerTest {
 
 	private JunctionController controller;
