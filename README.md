@@ -26,3 +26,20 @@ Each road will have cars approaching it in set intervals.
  - There are no pedestrian crosswalks
  - All cars are only going to the road across them, without turning.
  - A car will not start crossing the road if it doesnt have enough time to cross safely to the other side.
+
+ - car passage:
+[--------------------------------------------------
+	S = 5
+
+	x1 (first car) will take S to pass
+	xn (nth car) will take S + (n - 1) to pass
+
+	0	-xx[----]
+	1	--x[x---]
+	2	---[xx--]
+	3	---[-xx-]
+	4	---[--xx]
+	5	---[---x]x
+	6	---[----]xx 
+--------------------------------------------------]
+

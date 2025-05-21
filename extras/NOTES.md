@@ -4,6 +4,7 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 NOTE : test road green light timing better, add documentation.
 
 ## TODO
+- [ ] Make car move across the road in real time!
 - [x] Define Vehicle class NOTE: done as record in Road class
 	- [ ] OPTIONAL:  trucks? to be *2 size, (S), of regular cars
 
@@ -42,11 +43,23 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 		reads the config file, makes sure all values are valid and present.
 		reads into a Map <String, Float>
 
-	## TODO
 	Road
-		will contain a queue of the cars
+		contain a queue of the cars
 		queue can be added and removed from in FIFO style
 		when prompted, will assert how many cars shall pass given the Phase, green light, time
+	
+
+	Car {
+		length = 1;
+		S [time to cross junction]
+		Position in junction  [-QUEUELEN	= not first in road.
+								0 			= first in road
+								>0&<1		= on road
+									+1/S	every second
+								>=1			= car has passed the road]
+			
+		
+	}
 
 
 # UM?

@@ -2,19 +2,19 @@ package nroth.trafficSimulator;
 
 import java.util.*;
 
-
+import javax.management.InstanceNotFoundException;
 
 public class JunctionController {
 	private Road[] _roads;
 	private Map<String, Integer> _config = null;
 
-	private enum Phase { NS_GREEN, EW_GREEN }
-	private Phase _currentPhase = Phase.NS_GREEN;
+	private enum PhaseValue { NS_GREEN, EW_GREEN }
+	private JunctionPhase _currentPhase;
+
+	int time = 0;
 
 
-	private int phaseTimer = 0;
-	private	int time = 0;
-	private int currPhaseLen;
+
 
 	private int[] _carArrivals;
 
@@ -24,8 +24,8 @@ public class JunctionController {
 	public JunctionController(Map <String, Integer> config)
 	{
 		_config = new HashMap<>(config);
-		currPhaseLen = (_currentPhase == Phase.NS_GREEN ? _config.get ("X1") : _config.get ("X2"));
-
+		_currentPhase = new JunctionPhase();
+		
 		_roads = new Road[4];
 		for (int i = 0; i < 4; i++)
 			_roads[i] = new Road(_config.get("S"));
@@ -58,48 +58,34 @@ public class JunctionController {
 			myRoad.addCar();
 	}
 
-
-	//only triggered when end of phase reached
-	private void switchPhase()
-	{
-		switch (_currentPhase)
-		{
-			case NS_GREEN -> {
-				_roads[0].greenLight (currPhaseLen);
-				_roads[2].greenLight (currPhaseLen);
-
-				_currentPhase = Phase.EW_GREEN;
-				currPhaseLen =  _config.get("X1");
-
-			}
-			case EW_GREEN -> {
-				_roads[1].greenLight (currPhaseLen);
-				_roads[3].greenLight (currPhaseLen);
-
-				_currentPhase = Phase.NS_GREEN;
-				currPhaseLen =  _config.get("X2");
-			}
-		}
-	}
-
 	//FUNCTION TO RUN EVERY SECOND
 	public void tick()
 	{
-
-		// System.out.println("Tick. Phase: " + _currentPhase);
-
-		//switch phases
-		phaseTimer ++;
 		time ++;
 
-		//handle phase switching
-		if (phaseTimer >= currPhaseLen)
-		{
-			switchPhase();
-			phaseTimer = 0;
+		Map <String, Integer> res1;
+		Map <String, Integer> res2;
 
+		int roadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 0 : 1);
+		res1 = _roads[0 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+		res2 = _roads[2 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+
+		// System.out.println("road1: " + res1);
+		// System.out.println("road2: " + res2);
+
+		//sets carsonroad, carspassed, phasetimer
+		_currentPhase.update(res1, res2);
+
+		//handle phase switching
+		if (_currentPhase.phaseTimer >= _currentPhase.len)
+		{
 			System.out.println("--------------"+time+"---------------------");
-			System.out.printf("Phase switched! new phase: %s\n", (_currentPhase == Phase.NS_GREEN ? "North -> South" : "West -> East"));
+			System.out.println("phase overview: " + _currentPhase);
+			
+			_currentPhase.switchPhase();
+
+			System.out.println("New phase: " + _currentPhase);
+			
 			System.out.printf("Car Queues: \n\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)\n",
 			_roads[0].getQueueLen(),
 			_roads[1].getQueueLen(),
@@ -112,13 +98,53 @@ public class JunctionController {
 		//handle car arrivals
 		for (int idx = 0; idx < _carArrivals.length ; idx ++ )
 		{
-
-			if (time % _carArrivals[idx] == 0)
+			if (_carArrivals[idx] > 0 && time % _carArrivals[idx] == 0)
 			{
 				_roads[idx].addCar();
 				String[] dirs = {"North", "East", "South", "West"};
 				System.out.println(time + ": Car Arrived from " + dirs[idx]);
 			}
+		}
+	}
+
+
+	public class JunctionPhase {
+		PhaseValue phase;
+		int len;
+		int phaseTimer;
+		int carsPassed;
+		int carsOnRoad;
+
+		public JunctionPhase(){
+			phase = PhaseValue.NS_GREEN;
+			len = getPhaseLen();
+			phaseTimer = carsPassed = carsOnRoad = 0;
+		}
+
+		private int getPhaseLen()
+		{
+			return (this.phase == PhaseValue.NS_GREEN ? _config.get("X1") : _config.get("X2"));
+
+		}
+
+		public void switchPhase()
+		{
+			this.phase = (phase == PhaseValue.NS_GREEN ? PhaseValue.EW_GREEN : PhaseValue.NS_GREEN);
+			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
+		}
+
+		public void update(Map <String, Integer> res1, Map <String, Integer> res2)
+		{
+			carsPassed += res1.get("carsPassed");
+			carsPassed += res2.get("carsPassed");
+
+			carsOnRoad = res1.get("carsOnRoad") + res2.get("carsOnRoad");
+			this.phaseTimer++;
+
+		}
+
+		@Override public String toString() {
+			return String.format("Phase: %s; timer: %d; carsPassed: %d; carsOnRoad: %d", this.phase.name(), this.phaseTimer, this.carsPassed, this.carsOnRoad);
 		}
 
 	}

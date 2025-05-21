@@ -22,20 +22,7 @@ public class App {
 	}
 
 
-	public static void test_resource (String filepath){
-		Properties props = new Properties();
-		try (InputStream input = App.class.getClassLoader().getResourceAsStream(filepath)) {
-			if (input == null) {
-				System.out.println("Sorry, config file not found");
-				return;
-			}
-			props.load(input);
-			String value = props.getProperty("S");
-			System.out.println("Value: " + value);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
+
 	public static void main(String[] args) {
 
 		System.out.println("Traffic Simulator started.");
