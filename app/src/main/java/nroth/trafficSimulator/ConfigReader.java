@@ -1,3 +1,5 @@
+package nroth.trafficSimulator;
+
 import java.io.*;
 import java.util.*;
 
@@ -8,7 +10,7 @@ import java.util.*;
  */
 public class ConfigReader {
 
-	private String _filePath;
+	private String _filePath = null;
 	private Map<String, Integer> _mappedConfig = null;
 	private static List<String> _requiredKeys = Arrays.asList(
 			"X1",
@@ -29,13 +31,15 @@ public class ConfigReader {
 	 * @param path	Path to the config file
 	 * @throws FileNotFoundException
 	 */
-	public ConfigReader(String path) throws FileNotFoundException {
-		_filePath = path;
-
-		File f = new File(path);
-		if (!f.exists() || f.isDirectory()) {
+	public ConfigReader(String path)
+			throws FileNotFoundException, IOException
+	{
+		InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream(path);
+		if (inputStream == null) {
 			throw new FileNotFoundException(path + ": Config file not found!");
 		}
+		_filePath = path;
+		inputStream.close();
 	}
 
 	/**
@@ -96,9 +100,13 @@ public class ConfigReader {
 	 * @return Map<String, Integer>
 	 */
 	public Map<String, Integer> readConfigFile()
-		throws MissingKeyException, InvalidValueException, NumberFormatException, FileNotFoundException, IOException
+		throws MissingKeyException,
+		InvalidValueException,
+		NumberFormatException,
+		FileNotFoundException,
+		IOException
 	{
-		FileInputStream propsInput = new FileInputStream(_filePath);
+		InputStream propsInput = App.class.getClassLoader().getResourceAsStream(_filePath);
 		Properties prop = new Properties();
 		prop.load(propsInput);
 		_mappedConfig = propertiesToMap(prop);
