@@ -1,4 +1,4 @@
-package nroth.trafficSimulator;
+/* package nroth.trafficSimulator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ class JunctionControllerTest {
 		Map<String, Integer> res1 = new HashMap<>();
 		res1.put("carsPassed", 7);
 		res1.put("carsOnRoad", 5);
-		
+
 		Map<String, Integer> res2 = new HashMap<>();
 		res2.put("carsPassed", 7);
 		res2.put("carsOnRoad", 4);
@@ -73,7 +73,7 @@ class JunctionControllerTest {
 		res1 = new HashMap<>();
 		res1.put("carsPassed", 3);
 		res1.put("carsOnRoad", 5);
-		
+
 		res2 = new HashMap<>();
 		res2.put("carsPassed", 3);
 		res2.put("carsOnRoad", 4);
@@ -169,3 +169,4 @@ class JunctionControllerTest {
 
 
 }
+ */

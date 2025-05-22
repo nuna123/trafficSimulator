@@ -1,7 +1,6 @@
 package nroth.trafficSimulator;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Map;
 
 public class App {
 	private static String CONFIGFILE = "config.properties";
@@ -36,20 +35,20 @@ public class App {
 
 		JunctionController jc = new JunctionController(config);
 
-		try{
-			jc.addCar('N', 3);
-			jc.addCar('E', 2);
-			jc.addCar('S', 8);
-			jc.addCar('W', 13);
-		}
-		catch (Exception e){System.out.println(e);}
+		// try{
+		// 	jc.addCar('N', 3);
+		// 	jc.addCar('E', 2);
+		// 	jc.addCar('S', 8);
+		// 	jc.addCar('W', 13);
+		// }
+		// catch (Exception e){System.out.println(e);}
 
 
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-		Runnable task = () -> jc.tick();
+		jc.start(15);
 
-		int tickInterval = 1; //1sec
+		jc.printJunction();
 
-		scheduler.scheduleAtFixedRate(task, 0, tickInterval, TimeUnit.SECONDS); 
+
+
 	}
 }
