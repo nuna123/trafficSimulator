@@ -1,9 +1,15 @@
-/* package nroth.trafficSimulator;
+package nroth.trafficSimulator;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 class JunctionControllerTest {
@@ -12,7 +18,7 @@ class JunctionControllerTest {
 	private Map<String, Integer> config;
 
 	@BeforeEach
-	void setUp() {
+	public void setUp() {
 		config = new HashMap<>();
 			config.put("S", 10); // time for car to pass
 			config.put("A1", 2);
@@ -135,38 +141,74 @@ class JunctionControllerTest {
 	@Test
 	void testTickPhaseSwitching() {
 		// Simulate enough ticks to force a phase switch
-		String initialPhase = (String) controller.getCurrPhase().get("phase");
-		int phaseLen = (Integer) controller.getCurrPhase().get("len");
+		String initialPhase = (String) controller.getPhase().phase.name();
+		int phaseLen = (Integer) controller.getPhase().len;
 
 
 		for (int i = 0; i < phaseLen; i++) {
 			controller.tick();
 		}
 		// After phaseLen ticks, phase should have switched
-		String newPhase = (String) controller.getCurrPhase().get("phase");
+		String newPhase = (String) controller.getPhase().phase.name();
 
 		assertNotEquals(initialPhase, newPhase);
 	}
+
 	@Test
 	void testMultipleTickPhaseSwitching() {
 		// Simulate enough ticks to force a phase switch
-		String initialPhase = (String) controller.getCurrPhase().get("phase");
-		int phaseLen = (Integer) controller.getCurrPhase().get("len");
+		String initialPhase = (String) controller.getPhase().phase.name();
+		int phaseLen = (Integer) controller.getPhase().len;
 		for (int i = 0; i < phaseLen; i++) {
 			controller.tick();
 		}
 		//again!
-		phaseLen = (Integer) controller.getCurrPhase().get("len");
+		phaseLen = (Integer) controller.getPhase().len;
 		for (int i = 0; i < phaseLen; i++) {
 			controller.tick();
 		}
 
 		// After phaseLen ticks, phase should have switched
-		String newPhase = (String) controller.getCurrPhase().get("phase");
+		String newPhase = (String) controller.getPhase().phase.name();
 
 		assertEquals(initialPhase, newPhase);
 	}
 
+	@Test
+	void testAllCarsPassedOnePhase() {
+		int phaseLen = controller.getPhase().len;
 
+
+		// Simulate enough ticks to force a phase switch
+		for (int i = 0; i < phaseLen; i++) {
+			controller.tick();
+		}
+
+		// After phaseLen ticks, no cars should be on road
+		int carsOnRoad = controller.getPhase().carsOnRoad;
+
+		assertEquals(0, carsOnRoad);
+	}
+	@Test
+	void testAllCarsPassedMultiplePhases() {
+		int phaseLen = controller.getPhase().len;
+
+		// Simulate enough ticks to force a phase switch
+		for (int i = 0; i < phaseLen; i++) {
+			controller.tick();
+		}
+
+		//and switch again!
+		phaseLen = controller.getPhase().len;
+
+		// Simulate enough ticks to force a phase switch
+		for (int i = 0; i < phaseLen; i++) {
+			controller.tick();
+		}
+
+		// After phaseLen ticks, no cars should be on road
+		int carsOnRoad = controller.getPhase().carsOnRoad;
+
+		assertEquals(0, carsOnRoad);
+	}
 }
- */

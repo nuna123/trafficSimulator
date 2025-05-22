@@ -26,6 +26,7 @@ public class JunctionController {
 
 	public Road[] getRoads() {return _roads;}
 	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
+	public JunctionPhase getPhase(){return this._currentPhase;}
 
 	public JunctionController(Map<String, Integer> config) {
 		_config = new HashMap<>(config);
@@ -138,9 +139,8 @@ public class JunctionController {
 	/**
 	 * A function to be run every second(1 tick) of the function
 	 * handles car passage, phase switching, car arrivals
-	 * @param timeLimit_sec
 	 */
-	public void tick(int timeLimit_sec) {
+	public void tick() {
 		_elapsedTime++;
 
 		Map<String, Integer> res1;
@@ -201,7 +201,7 @@ public class JunctionController {
 		Runnable task = () -> {
 			synchronized (this.threadLock) {
 				if (timeLimit_sec != -1 && this._elapsedTime < timeLimit_sec)
-					this.tick(timeLimit_sec);
+					this.tick();
 				else
 					scheduler.shutdown();
 			}

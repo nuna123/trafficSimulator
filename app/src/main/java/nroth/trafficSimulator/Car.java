@@ -19,7 +19,6 @@ public class Car {
 
 	public final int length;
 	public final int crossingTime;
-	public final int id;
 	public final String plate;
 
 	public float posInJunction;
@@ -28,7 +27,6 @@ public class Car {
 
 	public Car (int id, int len, float position, int S)
 	{
-		this.id = id;
 		this.length = len;
 		this.posInJunction = position;
 		this.crossingTime = S * this.length; // to update s, incase different car lengths is implemented
@@ -43,6 +41,6 @@ public class Car {
 	}
 
 	@Override public String toString() {
-		return "Car" + id +": posInJunction= " + posInJunction;
+		return "Car" + plate +": posInJunction= " + posInJunction;
 	}
 }

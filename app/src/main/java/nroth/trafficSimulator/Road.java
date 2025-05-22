@@ -7,17 +7,15 @@ import java.util.Map;
 import java.util.Queue;
 
 public class Road {
-	private int _S;
-	// private record Car(float length, float posInJunction, int S) {};
+	//how long it takes car to cross the junction
+	private final int _S;
 
-
-	private Queue<Car> carsQueue= new LinkedList<>();
-	int carId = 1;
+	private final Queue<Car> carsQueue= new LinkedList<>();
 
 	public Road (int S){_S = S;}
 
 	public Car addCar(int carLength){
-		Car newCar = new Car(carId++, carLength, getQueueLen() * -1, _S);
+		Car newCar = new Car(carLength, getQueueLen() * -1, _S);
 		carsQueue.add(newCar);
 		return newCar;
 	}
