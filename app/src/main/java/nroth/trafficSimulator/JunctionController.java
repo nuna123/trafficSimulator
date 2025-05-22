@@ -21,25 +21,11 @@ public class JunctionController {
 	private final Object threadLock = new Object();
 
 	private int _totalCarsPassed;
-	private int _elapsedTime = 0;
+	private static int _elapsedTime = 0;
 
 
-	public Road[] getRoads() {
-		return _roads;
-	}
-
-	public Map<String, Integer> getConfig() {
-		return (_config == null ? null : Collections.unmodifiableMap(_config));
-	}
-
-	public Map<String, Object> getCurrPhase() {
-		return (_currentPhase == null ? null
-				: Map.ofEntries(Map.entry("phase", _currentPhase.phase.name()),
-						Map.entry("carsPassed", _currentPhase.carsPassed),
-						Map.entry("carsOnRoad", _currentPhase.carsOnRoad),
-						Map.entry("phaseTimer", _currentPhase.phaseTimer),
-						Map.entry("len", _currentPhase.len)));
-	}
+	public Road[] getRoads() {return _roads;}
+	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
 
 	public JunctionController(Map<String, Integer> config) {
 		_config = new HashMap<>(config);
@@ -54,11 +40,23 @@ public class JunctionController {
 			_carArrivals[i - 1] = _config.get("A" + String.valueOf(i));
 	}
 
+	/**
+	 * Add car to a specified road.
+	 * @param roadChar		[N, E, S, W]
+	 * @throws Exception	if roadchar is invalid
+	 */
 	public void addCar(char roadChar)
 			throws Exception {
 		this.addCar(roadChar, 1);
 	}
 
+	/**
+	 * Adds a specific number of cars to the queue of the specified road.
+	 *
+	 * @param roadChar		[N, E, S, W]
+	 * @param carNum		number of cars to add
+	 * @throws Exception	if roadchar is invalid
+	 */
 	public void addCar(char roadChar, int carNum)
 			throws Exception {
 		Road myRoad = (switch (roadChar) {
@@ -75,6 +73,11 @@ public class JunctionController {
 			myRoad.addCar();
 	}
 
+	/**
+	 * Returns the current state of the junction as a map.
+	 *
+	 * @return A map containing phase, elapsed time, cars on road, total cars passed, and road queue sizes.
+	 */
 	public Map<String, Object> getJunctionState() {
 		Map<String, Object> junctionState = new HashMap<>();
 
@@ -99,11 +102,19 @@ public class JunctionController {
 	}
 
 
-	public void print (String msg)
+	/**
+	 * prints a formatted version of msg with time
+	 * Is static to allow printing using the correct time value without instantiating
+	 * @param msg
+	 */
+	public static void print (String msg)
 	{
 		System.out.printf("[%ds]\t%s\n", _elapsedTime, msg);
 	}
 
+	/**
+	 * Prints a summary of the junction including queues and statistics.
+	 */
 	@SuppressWarnings("unchecked") // map is created consistently with above function
 	public void printJunction() {
 
@@ -124,7 +135,11 @@ public class JunctionController {
 
 	}
 
-	// FUNCTION TO RUN EVERY SECOND
+	/**
+	 * A function to be run every second(1 tick) of the function
+	 * handles car passage, phase switching, car arrivals
+	 * @param timeLimit_sec
+	 */
 	public void tick(int timeLimit_sec) {
 		_elapsedTime++;
 
@@ -141,7 +156,7 @@ public class JunctionController {
 		// handle phase switching
 		if (_currentPhase.phaseTimer >= _currentPhase.len) {
 
-			this.print("--------Phase switch!");
+			JunctionController.print("--------Phase switch!");
 			System.out.println("\tphase overview: " + _currentPhase);
 			this._totalCarsPassed += _currentPhase.carsPassed;
 
@@ -160,14 +175,18 @@ public class JunctionController {
 		// handle car arrivals
 		for (int idx = 0; idx < _carArrivals.length; idx++) {
 			if (_carArrivals[idx] > 0 && _elapsedTime % _carArrivals[idx] == 0) {
-				_roads[idx].addCar();
+				Car car = _roads[idx].addCar();
 				String[] dirs = { "North", "East", "South", "West" };
-				this.print("Car Arrived from " + dirs[idx]);
+				JunctionController.print("Car Arrived from " + dirs[idx] +": " + car.plate);
 			}
 		}
 	}
 
-	// FUNCTION TO TIME TICKS
+	/**
+	 * Starts the ssimulation, runs {@link tick} every second.
+	 * @param timeLimit_sec	simulation time limit in seconds. -1 for indefinite
+	 *
+	 */
 	public void start(int timeLimit_sec) {
 
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -198,6 +217,11 @@ public class JunctionController {
 		}
 	}
 
+	/**
+	 * represents the current traffic phase.
+	 * default is NS_GREEN
+	 * contains phase timing, length, and information about cars on the road
+	 */
 	public class JunctionPhase {
 		PhaseValue phase;
 		int len;
@@ -205,27 +229,43 @@ public class JunctionController {
 		int carsPassed;
 		int carsOnRoad;
 
+		/**
+		 * initializes to NS_GREEN, loads values
+		 */
 		public JunctionPhase() {
 			phase = PhaseValue.NS_GREEN;
 			len = getPhaseLen();
 			phaseTimer = carsPassed = carsOnRoad = 0;
 		}
-
+		/**
+		 * gets the correct phase len for the current phase
+		 * gets information from _config
+		 * @return phase length
+		 */
 		private int getPhaseLen() {
 			return (this.phase == PhaseValue.NS_GREEN ? _config.get("X1") : _config.get("X2"));
 		}
 
+		/**
+		 * function to switch between NS_GREEN / EW_GREEN
+		 * resets timer, cars information
+		 */
 		public void switchPhase() {
 			this.phase = (phase == PhaseValue.NS_GREEN ? PhaseValue.EW_GREEN : PhaseValue.NS_GREEN);
 			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
 			this.len = getPhaseLen();
 		}
 
-		public void update(Map<String, Integer> res1, Map<String, Integer> res2) {
-			carsPassed += res1.get("carsPassed");
-			carsPassed += res2.get("carsPassed");
+		/**
+		 * updates car values based on information recieved from roads.
+		 * @param road1
+		 * @param road2
+		 */
+		public void update(Map<String, Integer> road1, Map<String, Integer> road2) {
+			carsPassed += road1.get("carsPassed");
+			carsPassed += road2.get("carsPassed");
 
-			carsOnRoad = res1.get("carsOnRoad") + res2.get("carsOnRoad");
+			carsOnRoad = road1.get("carsOnRoad") + road2.get("carsOnRoad");
 			this.phaseTimer++;
 
 		}

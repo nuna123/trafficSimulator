@@ -1,6 +1,10 @@
 package nroth.trafficSimulator;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 public class Road {
 	private int _S;
@@ -12,14 +16,23 @@ public class Road {
 
 	public Road (int S){_S = S;}
 
-	public void addCar(int carLength){
-		carsQueue.add(new Car(carId++, carLength, getQueueLen() * -1, _S));
+	public Car addCar(int carLength){
+		Car newCar = new Car(carId++, carLength, getQueueLen() * -1, _S);
+		carsQueue.add(newCar);
+		return newCar;
 	}
-	public void addCar(){ addCar(1);}
+	public Car addCar(){ return addCar(1);}
 	public void removeCar(){ if (!carsQueue.isEmpty()) {carsQueue.remove();}}
 	public int getQueueLen() {return carsQueue.size();}
 
 
+	/**
+	 * Runs every second while road has green light.
+	 * goes over all cars, advances if theyre on the road,
+	 * calculates if have time to pass if car is at position 0
+	 * @param secInLight seconds left in this road phase
+	 * @return	mapped values of current carsOnRoad and carsPassed
+	 */
 	public Map<String, Integer> greenLight_tick(int secInLight)
 	{
 		int carsOnRoad = 0;
@@ -36,36 +49,30 @@ public class Road {
 		while (carIterator.hasNext())
 		{
 			currCar = carIterator.next();
-
-			// System.out.println(currCar);
-
+			//if car is on the road OR is in position 0 and has enoughtime left to safely cross
 			if ((currCar.posInJunction > 0 && currCar.posInJunction < 1) || (
-				currCar.posInJunction == 0 && currCar.S <= secInLight
-			))
-			{
-				currCar.posInJunction = currCar.posInJunction + (1.0f / currCar.S);
-				
-			}
-			
-			if (currCar.posInJunction >= 1)
+				currCar.posInJunction == 0 && currCar.crossingTime <= secInLight))
+				currCar.posInJunction = currCar.posInJunction + (1.0f / currCar.crossingTime);
+
+			if (currCar.posInJunction >= 1) //if the car passed the junction
 				carsPassed += 1;
-			else if (currCar.posInJunction > 0)
+			else if (currCar.posInJunction > 0) // if car is currently on road
 				carsOnRoad += 1;
-			else if (currCar.posInJunction <= 0)
+			else if (currCar.posInJunction <= 0) // car is still waiting to cross
 			{
 				roadCounter = 0;
-
 				do {
 					currCar.posInJunction = roadCounter;
 					roadCounter--;
 				}
-				while (carIterator.hasNext() && (currCar = carIterator.next()) != null );
+				while (carIterator.hasNext() && (currCar = carIterator.next()) != null);
 			}
 		}
-		
+
 		//cleanup cars that passed from the road
 		for (int i = 0; i < carsPassed; i++) {carsQueue.poll();}
 
+		//organize and return values
 		Map<String, Integer> ret = new HashMap<>();
 		ret.put("carsOnRoad", carsOnRoad);
 		ret.put("carsPassed", carsPassed);
@@ -74,9 +81,11 @@ public class Road {
 	}
 
 
-	public void print_road ()
+	/**
+	 * prints cars in road queue
+	 */
+	public void printRoad ()
 	{
-		System.out.println("-------------");
 		Iterator <Car> it = carsQueue.iterator();
 		Car currCar;
 		int idx = 0;
@@ -87,94 +96,4 @@ public class Road {
 			idx++;
 		}
 	}
-/* 
-	public Map<String, Int> greenLight_tick(int secInLight)
-	{
-		int carsOnRoad = 0;
-		int carsPassed = 0;
-
-		//go over car in passage, advance by 1/S
-		//count cars on passage, count cars that passed
-		//add car to passage if theres time
-		ListIterator<Car> carIterator = carsQueue.iterator();
-		Car currCar;
-		int currCarIdx;
-
-		while (carIterator.hasNext())
-		{
-			currCarIdx = carIterator.nextIndex();
-			currCar = carIterator.next();
-
-			System.out.println(currCar);
-
-			if (currCar.posInJunction >= 1) //car has passed the road
-			{
-				carsPassed += 1;
-				currCar.posInJunction = 2; //set to know to delete later
-			}
-
-			if (currCar.posInJunction < 1 && currCar.posInJunction > 0) //car is on the road
-			{
-				currCar.posInJunction += (1 / currCar.S);
-				if (currCar.posInJunction >= 1) //car has passed the road
-				{
-					carsPassed += 1;
-					currCar.posInJunction = 2; //set to know to delete later
-				}
-				else
-				{
-					carsOnRoad += 1;
-				}
-			}
-			if (currCar.posInJunction == 0 && currCar.S <= secInLight)  //car is first in queue
-			{
-				currCar.posInJunction += (1 / currCar.S);
-				carsOnRoad += 1;
-			}
-		}
-
-
-		Map<String, Int> ret = new HashMap<>();
-		ret.put("carsOnRoad", carsOnRoad);
-		ret.put("carsPassed", carsPassed);
-
-		return ret;
-	}
-
- */
-
-	/* 
-	public int calcCarPassage(int phaseTime)
-	{
-		int car_counter = 0;
-		Iterator<Car> carIterator = carsQueue.iterator();
-		Car currCar;
-
-		while (phaseTime > 0 && carIterator.hasNext())
-		{
-			currCar = carIterator.next();
-			// System.out.println(currCar.length());
-			if(phaseTime - (currCar.length() * _S) >= 0)
-			{
-				car_counter += 1;
-				phaseTime -= (currCar.length() * _S);
-			}
-			else
-			{
-				return car_counter;
-			}
-		}
-		return car_counter;
-	}
-
-	public int greenLight (int time)
-	{
-		int carPassing = calcCarPassage(time);
-		for (int i = 0; i< carPassing; i++)
-		{carsQueue.poll();}
-
-		return carPassing;
-	}
-
- */
 }
