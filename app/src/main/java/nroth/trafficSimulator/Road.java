@@ -9,20 +9,21 @@ import java.util.Queue;
 public class Road {
 	//how long it takes car to cross the junction
 	private final int _S;
+	private final Queue<Car> _carsQueue= new LinkedList<>();
 
-	private final Queue<Car> carsQueue= new LinkedList<>();
 
 	public Road (int S){_S = S;}
 
+	// car length is not really used.
 	public Car addCar(int carLength){
 		Car newCar = new Car(carLength, getQueueLen() * -1, _S);
-		carsQueue.add(newCar);
+		_carsQueue.add(newCar);
 		return newCar;
 	}
 	public Car addCar(){ return addCar(1);}
-	public void removeCar(){ if (!carsQueue.isEmpty()) {carsQueue.remove();}}
-	public int getQueueLen() {return carsQueue.size();}
-
+	public void removeCar(){_carsQueue.poll();}
+	public int getQueueLen() {return _carsQueue.size();}
+	public Queue<Car> getQueue() {return new LinkedList<>(_carsQueue);}
 
 	/**
 	 * Runs every second while road has green light.
@@ -40,7 +41,7 @@ public class Road {
 		//count cars on passage, count cars that passed
 		//add car to passage if theres time
 
-		Iterator<Car> carIterator = carsQueue.iterator();
+		Iterator<Car> carIterator = _carsQueue.iterator();
 		Car currCar;
 		int roadCounter;
 
@@ -68,7 +69,7 @@ public class Road {
 		}
 
 		//cleanup cars that passed from the road
-		for (int i = 0; i < carsPassed; i++) {carsQueue.poll();}
+		for (int i = 0; i < carsPassed; i++) {_carsQueue.poll();}
 
 		//organize and return values
 		Map<String, Integer> ret = new HashMap<>();
@@ -84,7 +85,7 @@ public class Road {
 	 */
 	public void printRoad ()
 	{
-		Iterator <Car> it = carsQueue.iterator();
+		Iterator <Car> it = _carsQueue.iterator();
 		Car currCar;
 		int idx = 0;
 		while (it.hasNext())

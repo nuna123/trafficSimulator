@@ -25,7 +25,7 @@ public class Car {
 
 	private final static Random _random = new Random();
 
-	public Car (int id, int len, float position, int S)
+	public Car (int len, float position, int S)
 	{
 		this.length = len;
 		this.posInJunction = position;

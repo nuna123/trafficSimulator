@@ -1,0 +1,87 @@
+' -	private field
+' +	public field
+
+'  UML Relationships:
+'  Road --> Car : contains cars in queue
+'  JunctionController --> Road : manages multiple roads
+'  JunctionController --> JunctionPhase : owns traffic phase logic
+'  JunctionPhase --> PhaseValue : uses enum for signal state
+
+@startuml
+
+
+class Car {
+	- static final int MIN_ID
+	- static final int MAX_ID
+	- static final Random _random
+	+ final int length
+	+ final int crossingTime
+	+ final String plate
+	+ float posInJunction
+
+	- String generatePlate()
+	+ Car(int len, float position, int S)
+	+ String toString()
+}
+
+class Road {
+	- final int _S
+	- final Queue<Car> _carsQueue
+
+	+ Road(int S)
+	+ Car addCar()
+	+ Car addCar(int carLength)
+	+ void removeCar()
+	+ int getQueueLen()
+	+ Queue<Car> getQueue()
+	+ Map<String, Integer> greenLight_tick(int secInLight)
+	+ void printRoad()
+}
+
+class JunctionController {
+	- final Map<String, Integer> _config
+	- final int[] _carArrivals
+	- final Road[] _roads
+	- final JunctionPhase _currentPhase
+	- final Object threadLock
+	- int _totalCarsPassed
+	- static int _elapsedTime
+
+	+ JunctionController(Map<String, Integer> config)
+	+ Road[] getRoads()
+	+ Map<String, Integer> getConfig()
+	+ JunctionPhase getPhase()
+	+ void addCar(char roadChar)
+	+ void addCar(char roadChar, int carNum)
+	+ Map<String, Object> getJunctionState()
+	+ static void print(String msg)
+	+ void printJunction()
+	+ void tick()
+	+ void start(int timeLimit_sec)
+}
+
+enum PhaseValue {
+	NS_GREEN
+	EW_GREEN
+}
+
+class JunctionPhase {
+	- PhaseValue phase
+	- int len
+	- int phaseTimer
+	- int carsPassed
+	- int carsOnRoad
+
+	- int getPhaseLen()
+	+ JunctionPhase()
+	+ void switchPhase()
+	+ void update(Map<String, Integer> road1, Map<String, Integer> road2)
+	+ String toString()
+}
+
+' Relationships
+Road --> Car : contains
+JunctionController --> Road : contains
+JunctionController --> JunctionPhase : contains
+JunctionPhase --> PhaseValue : uses
+@enduml
