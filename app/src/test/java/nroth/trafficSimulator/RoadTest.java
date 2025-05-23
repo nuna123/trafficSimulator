@@ -1,5 +1,8 @@
 package nroth.trafficSimulator;
 
+import java.util.Map;
+import java.util.Queue;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,5 +85,25 @@ class RoadTest {
 	4	---[--x]x
 	5	---[---]xx
  */
+	}
+
+	@Test
+	public void testGetQueueReturnsCopy() {
+		controller.addCar();
+		Queue<Car> queue1 = controller.getQueue();
+		Queue<Car> queue2 = controller.getQueue();
+		assertEquals(queue1, queue2);
+		queue1.poll();
+		// Original queue should not be affected
+		assertEquals(1, controller.getQueueLen());
+	}
+
+	@Test
+	public void testGreenLightTickReturnsCorrectMap() {
+		controller.addCar();
+		Map<String, Integer> result = controller.greenLight_tick(1);
+		// After one tick, one car should have passed (S=1)
+		assertEquals(0, (int) result.get("carsOnRoad"));
+		assertEquals(1, (int) result.get("carsPassed"));
 	}
 }
