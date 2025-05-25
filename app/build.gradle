@@ -21,6 +21,11 @@ dependencies {
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Logback for logging
+    implementation 'org.slf4j:slf4j-api:2.0.9' // or latest
+    // implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14' // or latest
+
     // This dependency is used by the application.
     implementation libs.guava
 }

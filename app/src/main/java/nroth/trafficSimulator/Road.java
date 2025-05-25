@@ -9,15 +9,17 @@ import java.util.Queue;
 public class Road {
 	//how long it takes car to cross the junction
 	private final int _S;
+	private final String _roadName;
 	private final Queue<Car> _carsQueue= new LinkedList<>();
 
 
-	public Road (int S){_S = S;}
+	public Road (int S, String roadname){_S = S;_roadName = roadname;}
 
 	// car length is not really used.
 	public Car addCar(int carLength){
 		Car newCar = new Car(carLength, getQueueLen() * -1, _S);
 		_carsQueue.add(newCar);
+		JunctionController.printToLog(_roadName + ": Car [" +newCar.plate + "] Arrived");
 		return newCar;
 	}
 	public Car addCar(){ return addCar(1);}
@@ -83,16 +85,21 @@ public class Road {
 	/**
 	 * prints cars in road queue
 	 */
-	public void printRoad ()
-	{
+
+	@Override
+	public String toString() {
 		Iterator <Car> it = _carsQueue.iterator();
 		Car currCar;
 		int idx = 0;
+		String out = null;
+		out += (_roadName + ": ");
 		while (it.hasNext())
 		{
 			currCar = it.next();
-			System.out.println(idx + ": " + currCar);
+			out += (idx + ": " + currCar);
 			idx++;
 		}
+		return out;
 	}
+
 }

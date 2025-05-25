@@ -1,12 +1,18 @@
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import java.io.*;
-import java.util.*;
-import static org.junit.Assert.*;
-
 package nroth.trafficSimulator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ConfigReaderTest {
 
@@ -16,7 +22,7 @@ public class ConfigReaderTest {
 	private static final String NON_INTEGER_CONFIG = "test_non_integer.properties";
 	private static final String NON_EXISTENT_CONFIG = "does_not_exist.properties";
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		createPropertiesFile(VALID_CONFIG, new Properties() {{
 			setProperty("X1", "10");
@@ -56,7 +62,7 @@ public class ConfigReaderTest {
 		}});
 	}
 
-	@After
+	@AfterEach
 	public void deleteFiles() {
 		deleteFileFromResources(VALID_CONFIG);
 		deleteFileFromResources(MISSING_KEY_CONFIG);
@@ -79,27 +85,35 @@ public class ConfigReaderTest {
 		assertEquals(Integer.valueOf(4), config.get("A4"));
 	}
 
-	@Test(expected = ConfigReader.MissingKeyException.class)
+	@Test
 	public void testReadConfigFile_MissingKey() throws Exception {
 		ConfigReader reader = new ConfigReader(MISSING_KEY_CONFIG);
-		reader.readConfigFile();
+		assertThrows(ConfigReader.MissingKeyException.class, () -> {
+			reader.readConfigFile();
+		});
 	}
 
-	@Test(expected = ConfigReader.InvalidValueException.class)
+	@Test
 	public void testReadConfigFile_InvalidValue() throws Exception {
 		ConfigReader reader = new ConfigReader(INVALID_VALUE_CONFIG);
-		reader.readConfigFile();
+		assertThrows(ConfigReader.InvalidValueException.class, () -> {
+			reader.readConfigFile();
+		});
 	}
 
-	@Test(expected = NumberFormatException.class)
+	@Test
 	public void testReadConfigFile_NonIntegerValue() throws Exception {
 		ConfigReader reader = new ConfigReader(NON_INTEGER_CONFIG);
-		reader.readConfigFile();
+		assertThrows(NumberFormatException.class, () -> {
+			reader.readConfigFile();
+		});
 	}
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void testReadConfigFile_FileNotFound() throws Exception {
-		new ConfigReader(NON_EXISTENT_CONFIG);
+		assertThrows(FileNotFoundException.class, () -> {
+			new ConfigReader(NON_EXISTENT_CONFIG);
+		});
 	}
 
 	// Helper methods to create/delete test property files in test resources

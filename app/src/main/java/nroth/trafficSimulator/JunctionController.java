@@ -33,8 +33,9 @@ public class JunctionController {
 		_currentPhase = new JunctionPhase();
 
 		_roads = new Road[4];
+		String[] roadnames = {"North", "West", "South", "East"};
 		for (int i = 0; i < 4; i++)
-			_roads[i] = new Road(_config.get("S"));
+			_roads[i] = new Road(_config.get("S"), roadnames[i]);
 
 		_carArrivals = new int[4];
 		for (int i = 1; i <= 4; i++)
@@ -108,9 +109,9 @@ public class JunctionController {
 	 * Is static to allow printing using the correct time value without instantiating
 	 * @param msg
 	 */
-	public static void print (String msg)
+	public static void printToLog (String msg)
 	{
-		System.out.printf("[%ds]\t%s\n", _elapsedTime, msg);
+		App.log_info(String.format("[%ds]\t%s", _elapsedTime, msg));
 	}
 
 	/**
@@ -156,37 +157,36 @@ public class JunctionController {
 		// handle phase switching
 		if (_currentPhase.phaseTimer >= _currentPhase.len) {
 
-			JunctionController.print("--------Phase switch!");
-			System.out.println("\tphase overview: " + _currentPhase);
+			JunctionController.printToLog("--------Phase switch!");
+			JunctionController.printToLog("\tphase overview: " + _currentPhase);
 			this._totalCarsPassed += _currentPhase.carsPassed;
 
 			_currentPhase.switchPhase();
 
-			System.out.println("\tNew phase: " + _currentPhase);
+			JunctionController.printToLog("\tNew phase: " + _currentPhase);
 
-			System.out.printf("\tCar Queues: \n\t\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)\n",
+			JunctionController.printToLog(String.format("\tCar Queues:\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)",
 					_roads[0].getQueueLen(),
 					_roads[1].getQueueLen(),
 					_roads[2].getQueueLen(),
-					_roads[3].getQueueLen());
+					_roads[3].getQueueLen()));
 
 		}
 
 		// handle car arrivals
 		for (int idx = 0; idx < _carArrivals.length; idx++) {
 			if (_carArrivals[idx] > 0 && _elapsedTime % _carArrivals[idx] == 0) {
-				Car car = _roads[idx].addCar();
-				String[] dirs = { "North", "East", "South", "West" };
-				JunctionController.print("Car Arrived from " + dirs[idx] +": " + car.plate);
+				_roads[idx].addCar();
 			}
 		}
 	}
 
 	/**
-	 * Starts the ssimulation, runs {@link tick} every second.
+	 * Starts the simulation, runs {@link tick} every second.
 	 * @param timeLimit_sec	simulation time limit in seconds. -1 for indefinite
 	 *
 	 */
+	public void start(){this.start(-1);}
 	public void start(int timeLimit_sec) {
 
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -200,7 +200,7 @@ public class JunctionController {
 
 		Runnable task = () -> {
 			synchronized (this.threadLock) {
-				if (timeLimit_sec != -1 && this._elapsedTime < timeLimit_sec)
+				if (timeLimit_sec != -1 && JunctionController._elapsedTime < timeLimit_sec)
 					this.tick();
 				else
 					scheduler.shutdown();

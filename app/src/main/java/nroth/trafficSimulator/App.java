@@ -2,11 +2,17 @@ package nroth.trafficSimulator;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class App {
-	private static String CONFIGFILE = "config.properties";
+
+
+	private static final String CONFIGFILE = "config.properties";
+	private static final Logger logger = LoggerFactory.getLogger(App.class);
 
 	static Map <String, Integer>  getConfig(){
-		ConfigReader cr = null;
+		ConfigReader cr;
 		try {
 			cr = new ConfigReader(CONFIGFILE);
 			cr.readConfigFile();
@@ -19,11 +25,13 @@ public class App {
 		return cr.getMappedConfig();
 	}
 
-
+	public static void log_info (String msg)
+	{
+		logger.info(msg);
+	}
 
 	public static void main(String[] args) {
 
-		System.out.println("Traffic Simulator started.");
 
 		Map <String, Integer> config = getConfig();
 		if (config == null){
@@ -44,9 +52,11 @@ public class App {
 		// catch (Exception e){System.out.println(e);}
 
 
-		jc.start(15);
-
+		JunctionController.printToLog("Traffic Simulator starting.");
+		jc.start();
 		jc.printJunction();
+
+		JunctionController.printToLog("Traffic Simulator finished");
 
 
 

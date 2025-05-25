@@ -15,7 +15,7 @@ class RoadTest {
 	@BeforeEach
 	public void setUp() {
 		int S = 1; // how long it takes car to cross the road
-		controller = new Road(S);
+		controller = new Road(S, "testRoad");
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class RoadTest {
 	@Test
 	public void carPasses_s3() //note: S = 3, meaning a car will fully pass in 3 ticks
 	{
-		controller = new Road(3);
+		controller = new Road(3, "road!");
 
 		int car_queue_len = 5;
 		int timer = 5;
@@ -67,11 +67,9 @@ class RoadTest {
 		controller.greenLight_tick(timer--);
 		//car should not have passed
 		assertEquals(car_queue_len, controller.getQueueLen());
-		System.out.print("\n");
-		controller.printRoad();
 
 		//in 4 more ticks, 3 cars should fully pass
-		while (timer > 0){controller.greenLight_tick(timer);  System.out.println("\ntimer: " + timer--);controller.printRoad();}
+		while (timer > 0){controller.greenLight_tick(timer);  System.out.println("\ntimer: " + timer--);}
 
 		assertEquals(car_queue_len - 3, controller.getQueueLen());
 
