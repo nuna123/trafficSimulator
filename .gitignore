@@ -7,5 +7,5 @@
 # Ignore Gradle build output directory
 build
 
-#output folder
-out/
+#log folder
+logs

@@ -1,14 +1,20 @@
 <configuration>
 
+    <!-- Timestamp evaluated once per JVM startup -->
+    <timestamp key="startupTime" datePattern="yyyy-MM-dd_HH-mm-ss" />
+
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/app.log</file>
+        <!-- Use the startup timestamp in the filename -->
+        <file>logs/app_${startupTime}.log</file>
+
         <append>false</append>
+
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="FILE" />
     </root>
 

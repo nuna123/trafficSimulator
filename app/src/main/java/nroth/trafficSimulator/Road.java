@@ -56,7 +56,10 @@ public class Road {
 				currCar.posInJunction = currCar.posInJunction + (1.0f / currCar.crossingTime);
 
 			if (currCar.posInJunction >= 1) //if the car passed the junction
+			{
 				carsPassed += 1;
+				JunctionController.printToLog(_roadName + ": car " + currCar.plate + " has passed!");
+			}
 			else if (currCar.posInJunction > 0) // if car is currently on road
 				carsOnRoad += 1;
 			else if (currCar.posInJunction <= 0) // car is still waiting to cross
@@ -91,8 +94,10 @@ public class Road {
 		Iterator <Car> it = _carsQueue.iterator();
 		Car currCar;
 		int idx = 0;
-		String out = null;
+		String out = "";
 		out += (_roadName + ": ");
+		if (!it.hasNext())
+			out += "[No Cars]";
 		while (it.hasNext())
 		{
 			currCar = it.next();

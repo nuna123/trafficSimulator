@@ -1,15 +1,11 @@
 package nroth.trafficSimulator;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class App {
-
-
 	private static final String CONFIGFILE = "config.properties";
-	private static final Logger logger = LoggerFactory.getLogger(App.class);
 
 	static Map <String, Integer>  getConfig(){
 		ConfigReader cr;
@@ -25,10 +21,6 @@ public class App {
 		return cr.getMappedConfig();
 	}
 
-	public static void log_info (String msg)
-	{
-		logger.info(msg);
-	}
 
 	public static void main(String[] args) {
 
@@ -38,7 +30,7 @@ public class App {
 			System.out.println("\nconfig is null, exiting....");
 			return;
 		}
-		System.out.println("CONFIG:" + config);
+		System.out.println("MAIN: CONFIG:" + config);
 
 
 		JunctionController jc = new JunctionController(config);
@@ -52,13 +44,17 @@ public class App {
 		// catch (Exception e){System.out.println(e);}
 
 
-		JunctionController.printToLog("Traffic Simulator starting.");
-		jc.start();
-		jc.printJunction();
-
-		JunctionController.printToLog("Traffic Simulator finished");
+		jc.start(-1);
 
 
+		try {
+			jc.scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			JunctionController.printToLog("FROM MAIN: Main thread interrupted.");
+		}
+
+		// System.out.print(jc.summary());
+		JunctionController.printToLog("MAIN: Back in main. exiting ...");
 
 	}
 }

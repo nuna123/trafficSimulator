@@ -8,7 +8,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JunctionController {
+
+	public ScheduledExecutorService scheduler = null;
 
 	public enum PhaseValue {
 		NS_GREEN, EW_GREEN
@@ -19,10 +24,11 @@ public class JunctionController {
 	private final Road[] _roads;
 	private final JunctionPhase _currentPhase;
 	private final Object threadLock = new Object();
+	private static final Logger _logger = LoggerFactory.getLogger(App.class);
+
 
 	private int _totalCarsPassed;
 	private static int _elapsedTime = 0;
-
 
 	public Road[] getRoads() {return _roads;}
 	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
@@ -105,37 +111,46 @@ public class JunctionController {
 
 
 	/**
+	 * get Junction summary
+	 * @return
+	 */
+	public String summary() {
+		String out = "";
+
+		Map<String, Object> js = getJunctionState();
+		@SuppressWarnings("unchecked") //is safe! this mapis only created once. is always <String, Integer>
+		Map<String, Integer> queues = (Map<String, Integer>) js.get("roadQueues");
+
+		out += ("\n---- JUNCTION SUMMARY ----\n");
+		out += String.format("Elapsed time: %d\n", js.get("elapsedTime"));
+		out += String.format("Cars on road: %d\n", js.get("carsOnRoad"));
+		out += ("Current Queues:");
+		out += String.format("  North: %d\n", queues.get("North"));
+		out += String.format("  East:  %d\n", queues.get("East"));
+		out += String.format("  South: %d\n", queues.get("South"));
+		out += String.format("  West:  %d\n", queues.get("West"));
+		out += String.format("Total cars in junction: %d\n", queues.get("Total"));
+		out += String.format("Total cars passed in junction: %d\n", js.get("totalCarsPassed"));
+		out += ("--------------------------");
+
+		return out;
+	}
+
+	/**
 	 * prints a formatted version of msg with time
 	 * Is static to allow printing using the correct time value without instantiating
 	 * @param msg
 	 */
 	public static void printToLog (String msg)
 	{
-		App.log_info(String.format("[%ds]\t%s", _elapsedTime, msg));
+		_logger.info(String.format("[%ds]\t%s", _elapsedTime, msg));
+		System.out.printf(String.format("[%ds]\t%s\n", _elapsedTime, msg));
+	}
+	public static void printDebug (String msg)
+	{
+		_logger.debug(String.format("[%ds]\t%s", _elapsedTime, msg));
 	}
 
-	/**
-	 * Prints a summary of the junction including queues and statistics.
-	 */
-	@SuppressWarnings("unchecked") // map is created consistently with above function
-	public void printJunction() {
-
-		Map<String, Object> js = getJunctionState();
-		Map<String, Integer> queues = (Map<String, Integer>) js.get("roadQueues");
-
-		System.out.println("\n---- JUNCTION SUMMARY ----");
-		System.out.printf("Elapsed time: %d\n", js.get("elapsedTime"));
-		System.out.printf("Cars on road: %d\n", js.get("carsOnRoad"));
-		System.out.println("Current Queues:");
-		System.out.printf("  North: %d\n", queues.get("North"));
-		System.out.printf("  East:  %d\n", queues.get("East"));
-		System.out.printf("  South: %d\n", queues.get("South"));
-		System.out.printf("  West:  %d\n", queues.get("West"));
-		System.out.printf("Total cars in junction: %d\n", queues.get("Total"));
-		System.out.printf("Total cars passed in junction: %d\n", js.get("totalCarsPassed"));
-		System.out.println("--------------------------");
-
-	}
 
 	/**
 	 * A function to be run every second(1 tick) of the function
@@ -150,6 +165,8 @@ public class JunctionController {
 		int roadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 0 : 1);
 		res1 = _roads[0 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
 		res2 = _roads[2 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+
+		JunctionController.printDebug(String.format("road states: {\n\t[%s], \n\t[%s]}", _roads[0 + roadOffset].toString(),_roads[2 + roadOffset].toString()));
 
 		// sets carsOnRoad, carsPassed, phasetimer
 		_currentPhase.update(res1, res2);
@@ -172,7 +189,6 @@ public class JunctionController {
 					_roads[3].getQueueLen()));
 
 		}
-
 		// handle car arrivals
 		for (int idx = 0; idx < _carArrivals.length; idx++) {
 			if (_carArrivals[idx] > 0 && _elapsedTime % _carArrivals[idx] == 0) {
@@ -181,15 +197,31 @@ public class JunctionController {
 		}
 	}
 
+
 	/**
 	 * Starts the simulation, runs {@link tick} every second.
 	 * @param timeLimit_sec	simulation time limit in seconds. -1 for indefinite
-	 *
+	 * @exception IllegalArgumentException timeLimit_sec cannot be smaller than -1
 	 */
-	public void start(){this.start(-1);}
-	public void start(int timeLimit_sec) {
+	public void start(int timeLimit_sec)
+			throws IllegalArgumentException
+	{
 
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+		if (timeLimit_sec < -1)
+		{
+			throw new IllegalArgumentException("timeLimit_sec must bea positive int, or -1 for indefinite run.");
+		}
+
+		scheduler = Executors.newSingleThreadScheduledExecutor();
+		// Add shutdown hook to catch Ctrl+C
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (JunctionController._elapsedTime < timeLimit_sec)
+			{
+				JunctionController.printToLog("[!] Non-peaceful termination: Ctrl+C");
+				scheduler.shutdownNow();  // Optional: force shutdown
+			}
+			JunctionController.printToLog(this.summary());
+		}));
 
 		// the synchronized block makes sure only 1 thread can run this runnable at a
 		// time
@@ -200,13 +232,16 @@ public class JunctionController {
 
 		Runnable task = () -> {
 			synchronized (this.threadLock) {
-				if (timeLimit_sec != -1 && JunctionController._elapsedTime < timeLimit_sec)
+				if (timeLimit_sec == -1 || JunctionController._elapsedTime < timeLimit_sec)
 					this.tick();
-				else
+				else{
 					scheduler.shutdown();
+					JunctionController.printToLog("[!] Time limit reached! Shutting down scheduler.");
+				}
 			}
 		};
 
+		JunctionController.printToLog("From JunctionController: starting simulation...");
 		int tickInterval = 1; // 1sec
 
 		scheduler.scheduleAtFixedRate(task, 0, tickInterval, TimeUnit.SECONDS);
@@ -272,9 +307,12 @@ public class JunctionController {
 
 		@Override
 		public String toString() {
-			return String.format("Phase: %s; len: %d;timer: %d; carsPassed: %d; carsOnRoad: %d", this.phase.name(),
+			return String.format("Phase: %s; len: %d; timer: %d; carsPassed: %d; carsOnRoad: %d", this.phase.name(),
 					this.len, this.phaseTimer, this.carsPassed, this.carsOnRoad);
 		}
 
 	}
+
+
+
 }
