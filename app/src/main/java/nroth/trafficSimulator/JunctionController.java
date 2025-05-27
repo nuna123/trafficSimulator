@@ -12,9 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JunctionController {
-
-	public ScheduledExecutorService scheduler = null;
-
 	public enum PhaseValue {
 		NS_GREEN, EW_GREEN
 	}
@@ -137,8 +134,8 @@ public class JunctionController {
 	}
 
 	/**
-	 * prints a formatted version of msg with time
-	 * Is static to allow printing using the correct time value without instantiating
+	 * logs and prints a formatted version of msg with time
+	 * Is static to allow printing using the correct time value without instantiating JunctionController
 	 * @param msg
 	 */
 	public static void printToLog (String msg)
@@ -146,6 +143,11 @@ public class JunctionController {
 		_logger.info(String.format("[%ds]\t%s", _elapsedTime, msg));
 		System.out.printf(String.format("[%ds]\t%s\n", _elapsedTime, msg));
 	}
+	/**
+	 * logs a formatted version of msg with time, as debug message
+	 * Is static to allow printing using the correct time value without instantiating JunctionController
+	 * @param msg
+	 */
 	public static void printDebug (String msg)
 	{
 		_logger.debug(String.format("[%ds]\t%s", _elapsedTime, msg));
@@ -206,14 +208,15 @@ public class JunctionController {
 	public void start(int timeLimit_sec)
 			throws IllegalArgumentException
 	{
-
 		if (timeLimit_sec < -1)
 		{
 			throw new IllegalArgumentException("timeLimit_sec must bea positive int, or -1 for indefinite run.");
 		}
 
-		scheduler = Executors.newSingleThreadScheduledExecutor();
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
 		// Add shutdown hook to catch Ctrl+C
+		// Note: Gradle runtime environment interferes with this, output will be shown in logs but not console
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			if (JunctionController._elapsedTime < timeLimit_sec)
 			{
@@ -245,8 +248,12 @@ public class JunctionController {
 		int tickInterval = 1; // 1sec
 
 		scheduler.scheduleAtFixedRate(task, 0, tickInterval, TimeUnit.SECONDS);
+
 		try {
-			scheduler.awaitTermination(timeLimit_sec + 2, TimeUnit.SECONDS);
+			if (timeLimit_sec == -1)
+				scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+			else
+				scheduler.awaitTermination(timeLimit_sec + 2, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			System.err.print(e);
 		}

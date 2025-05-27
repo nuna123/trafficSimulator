@@ -1,7 +1,6 @@
 package nroth.trafficSimulator;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 public class App {
@@ -41,20 +40,11 @@ public class App {
 		// 	jc.addCar('S', 8);
 		// 	jc.addCar('W', 13);
 		// }
-		// catch (Exception e){System.out.println(e);}
+		// catch (Exception e){System.out.println(e); return;}
 
 
-		jc.start(-1);
+		jc.start(3);
 
-
-		try {
-			jc.scheduler.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			JunctionController.printToLog("FROM MAIN: Main thread interrupted.");
-		}
-
-		// System.out.print(jc.summary());
 		JunctionController.printToLog("MAIN: Back in main. exiting ...");
-
 	}
 }
