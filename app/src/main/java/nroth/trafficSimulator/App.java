@@ -43,7 +43,7 @@ public class App {
 		// catch (Exception e){System.out.println(e); return;}
 
 
-		jc.start(3);
+		jc.start(-1);
 
 		JunctionController.printToLog("MAIN: Back in main. exiting ...");
 	}

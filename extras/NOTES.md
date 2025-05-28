@@ -15,7 +15,7 @@ NOTE : test road green light timing better, add documentation.
 
 - [x] JunctionController class
 	- [ ] Arr[4] of Roads
-	- [ ] light switching logic -
+	- [x] light switching logic -
 				Limit by number of cars??? time???? both????
 				wait for car to arrive-> turn on phase A/B -> switch to other phase if needed
 				if no cars, no need to turn any lights on.
@@ -25,8 +25,11 @@ NOTE : test road green light timing better, add documentation.
 - [x] Add Config validation for unreasonable values:
 	[x]- S cant be larger than X1/X2!
 
-- [ ] Write unit tests for Intersection
-- [ ] Add diagrams - UML and Sequence/Activity diagram
+- [x] Write unit tests for Intersection
+- [x] Add diagrams - UML
+	- [ ] Sequence/Activity diagram
+
+- TESTING: JunctionController.start(-1) ?
 
 
 ## CONFIG VARIABLES:
@@ -48,7 +51,7 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 		contain a queue of the cars
 		queue can be added and removed from in FIFO style
 		when prompted, will assert how many cars shall pass given the Phase, green light, time
-	
+
 
 	Car {
 		length = 1;
@@ -58,8 +61,8 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 								>0&<1		= on road
 									+1/S	every second
 								>=1			= car has passed the road]
-			
-		
+
+
 	}
 
 
@@ -70,12 +73,12 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 
 # GRADLE
 ## what is it?
-A build automation tool that simplifies the process of building and deploying software, particularly for Java. 
+A build automation tool that simplifies the process of building and deploying software, particularly for Java.
 
 ## DSL (Domain Specific Language)
     The language used to configure build scripts in gradle. Gradle uses either Groovy or Kotlin
    *Groovy* :
-   - Original Gradle DSL. 
+   - Original Gradle DSL.
    - Syntax more dynamic, flexible
    - easier for beginners
    - because it has longer history, more online examples/tutorials
@@ -84,7 +87,7 @@ A build automation tool that simplifies the process of building and deploying so
    - Syntax is more Strict
    - Type-safe (ensures the datatype is correct at compile time)
    - even though its newer than Groovy (introduced 2016) has sa ton of online guides
-    
+
 
 ## The GradleWrapper
     The Wrapper is a script that invokes a declared version of Gradle, downloading it beforehand if necessary. Instead of running gradle build using the installed Gradle, you use the Gradle Wrapper by calling ./gradlew build.
@@ -94,7 +97,7 @@ A build automation tool that simplifies the process of building and deploying so
 
 ##tasks
     work unit that can be done by Gradle as part of the build - like compilation, copying files around, etc
-    view using [./gradlew tasks] 
+    view using [./gradlew tasks]
 
 
 ##files:

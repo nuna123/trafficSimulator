@@ -155,6 +155,36 @@ public class JunctionController {
 
 
 	/**
+	 * handles phase switching, evaluates if switch is needed - if cars are waiting on the perpendicular road
+	 */
+	private void switchPhase ()
+	{
+		JunctionController.printToLog("--------Phase switch!");
+		JunctionController.printToLog("\tphase overview: " + _currentPhase);
+		this._totalCarsPassed += _currentPhase.carsPassed;
+
+		int secondRoadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 1 : 0);
+		//if there are cars on the other side
+		if (_roads[0 + secondRoadOffset].getQueueLen() + _roads[2 + secondRoadOffset].getQueueLen() > 0)
+			_currentPhase.switchPhase();
+		else
+		{
+			JunctionController.printToLog("[!] Phase not switched! no cars on other road.");
+			_currentPhase.resetPhase();
+		}
+
+		JunctionController.printToLog("\tNew phase: " + _currentPhase);
+
+		JunctionController.printToLog(String.format("\tCar Queues:\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)",
+				_roads[0].getQueueLen(),
+				_roads[1].getQueueLen(),
+				_roads[2].getQueueLen(),
+				_roads[3].getQueueLen()));
+
+	}
+
+
+	/**
 	 * A function to be run every second(1 tick) of the function
 	 * handles car passage, phase switching, car arrivals
 	 */
@@ -174,28 +204,12 @@ public class JunctionController {
 		_currentPhase.update(res1, res2);
 
 		// handle phase switching
-		if (_currentPhase.phaseTimer >= _currentPhase.len) {
-
-			JunctionController.printToLog("--------Phase switch!");
-			JunctionController.printToLog("\tphase overview: " + _currentPhase);
-			this._totalCarsPassed += _currentPhase.carsPassed;
-
-			_currentPhase.switchPhase();
-
-			JunctionController.printToLog("\tNew phase: " + _currentPhase);
-
-			JunctionController.printToLog(String.format("\tCar Queues:\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)",
-					_roads[0].getQueueLen(),
-					_roads[1].getQueueLen(),
-					_roads[2].getQueueLen(),
-					_roads[3].getQueueLen()));
-
-		}
+		if (_currentPhase.phaseTimer >= _currentPhase.len)
+			switchPhase();
 		// handle car arrivals
 		for (int idx = 0; idx < _carArrivals.length; idx++) {
-			if (_carArrivals[idx] > 0 && _elapsedTime % _carArrivals[idx] == 0) {
+			if (_carArrivals[idx] > 0 && _elapsedTime % _carArrivals[idx] == 0)
 				_roads[idx].addCar();
-			}
 		}
 	}
 
@@ -271,13 +285,18 @@ public class JunctionController {
 		int carsPassed;
 		int carsOnRoad;
 
+		public void resetPhase()
+		{
+			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
+			this.len = getPhaseLen();
+		}
 		/**
 		 * initializes to NS_GREEN, loads values
 		 */
 		public JunctionPhase() {
-			phase = PhaseValue.NS_GREEN;
-			len = getPhaseLen();
-			phaseTimer = carsPassed = carsOnRoad = 0;
+			this.phase = PhaseValue.NS_GREEN;
+			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
+			this.len = getPhaseLen();
 		}
 		/**
 		 * gets the correct phase len for the current phase
@@ -288,14 +307,14 @@ public class JunctionController {
 			return (this.phase == PhaseValue.NS_GREEN ? _config.get("X1") : _config.get("X2"));
 		}
 
+
 		/**
 		 * function to switch between NS_GREEN / EW_GREEN
 		 * resets timer, cars information
 		 */
 		public void switchPhase() {
 			this.phase = (phase == PhaseValue.NS_GREEN ? PhaseValue.EW_GREEN : PhaseValue.NS_GREEN);
-			this.phaseTimer = this.carsPassed = this.carsOnRoad = 0;
-			this.len = getPhaseLen();
+			resetPhase();
 		}
 
 		/**

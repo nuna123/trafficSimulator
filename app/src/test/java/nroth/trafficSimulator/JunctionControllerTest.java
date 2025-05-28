@@ -27,6 +27,7 @@ class JunctionControllerTest {
 			config.put("A4", 5);
 			config.put("X1", 7); // NS_GREEN phase length
 			config.put("X2", 8); // EW_GREEN phase length
+
 		controller = new JunctionController(config);
 	}
 
@@ -189,6 +190,7 @@ class JunctionControllerTest {
 
 		assertEquals(0, carsOnRoad);
 	}
+
 	@Test
 	void testAllCarsPassedMultiplePhases() {
 		int phaseLen = controller.getPhase().len;
@@ -210,5 +212,19 @@ class JunctionControllerTest {
 		int carsOnRoad = controller.getPhase().carsOnRoad;
 
 		assertEquals(0, carsOnRoad);
+	}
+
+	@Test
+	void testTimeLimitFollowed()
+	{
+		int timeLimit = 5;
+
+		controller.start(timeLimit);
+
+		// After simulation, elapsed time should be at least the time limit, but not much more
+		Map<String, Object> state = controller.getJunctionState();
+
+		int elapsed = (int) state.get("elapsedTime");
+		assertTrue(elapsed == timeLimit, "Simulation should run for the specified time limit");
 	}
 }
