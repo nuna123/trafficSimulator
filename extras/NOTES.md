@@ -1,7 +1,6 @@
 # Traffic Simulator
 Traffic Intersection Simulator - Green:Code Internship Assignment
 
-NOTE : test road green light timing better, add documentation.
 
 ## TODO
 - [x] Make car move across the road in real time!
@@ -24,12 +23,14 @@ NOTE : test road green light timing better, add documentation.
 
 - [x] Add Config validation for unreasonable values:
 	[x]- S cant be larger than X1/X2!
+	[x]- A[1-4] can be only positive int or -1
+	[x]- other values than A[1-4] can be only positive int, largr than 0
 
 - [x] Write unit tests for Intersection
+
 - [x] Add diagrams - UML
 	- [ ] Sequence/Activity diagram
 
-- TESTING: JunctionController.start(-1) ?
 
 
 ## CONFIG VARIABLES:
@@ -47,12 +48,6 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 		reads the config file, makes sure all values are valid and present.
 		reads into a Map <String, Float>
 
-	Road
-		contain a queue of the cars
-		queue can be added and removed from in FIFO style
-		when prompted, will assert how many cars shall pass given the Phase, green light, time
-
-
 	Car {
 		length = 1;
 		S [time to cross junction]
@@ -61,14 +56,19 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 								>0&<1		= on road
 									+1/S	every second
 								>=1			= car has passed the road]
-
-
 	}
 
+	Road
+		contain a queue of the cars
+		queue can be added and removed from in FIFO style
+		tasks for each second - 
+			- advance cars on road
+			- calculate if car in queue position 0 should start crossing, based on time left in current phase
+			- if car in queue 0 passes, advance cars waiting in queue 
 
-# UM?
-- if a car is standing behind another, how long would it take it to reach the juncture? is it calculated as 1timeunit / car or should the distance of the car from the cross be calculated?
-
+	JunctionController
+		contain a list of 4 roads
+		controlls phase switching, timing, car arrivals, logging
 
 
 # GRADLE

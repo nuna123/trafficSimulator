@@ -58,6 +58,16 @@ public class ConfigReader {
 				throw new MissingKeyException("Missing Key " + key + " in config file!");
 		}
 
+		
+		//only A[1-4] can be smaller than 1
+		// A[1-4] can be a positive integer, or -1.
+		for (String key : _requiredKeys) {
+			if (!key.startsWith("A") && config.get(key) < 1)
+				throw new MissingKeyException("Value of " + key + " cannot less than 1!");
+			else if (key.startsWith("A") && config.get(key) != -1 && config.get(key) < 1)
+				throw new MissingKeyException("Value of " + key + " can be a positive integer, or -1.");
+		}
+
 		// S cannot be larger than X1/X2, how would a car cross the road?
 		if (config.get("S") > config.get("X1")
 			|| config.get("S") > config.get("X2"))
@@ -82,7 +92,9 @@ public class ConfigReader {
 
 		for (String key : properties.stringPropertyNames()) {
 			Integer num;
-			try{num = Integer.valueOf(properties.getProperty(key));}
+			try{
+				num = Integer.valueOf(properties.getProperty(key));
+			}
 			catch(NumberFormatException e){
 				throw new NumberFormatException(properties.getProperty(key) + " could not be converted to integer!\n");
 			}
@@ -114,7 +126,6 @@ public class ConfigReader {
 
 		return _mappedConfig;
 	}
-
 
 
 	// CUSTOM EXCEPTIONS

@@ -6,6 +6,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+/**
+ * ROAD
+ * manages individual roads. 
+ * contains a linked list of {@link Car} to be added and removed from, and individually advanced.
+ * greenlight_tick() -
+ * 		goes over all cars, advances each depending on position
+ * 		removes cars that safely crossed the road
+ */
 public class Road {
 	//how long it takes car to cross the junction
 	private final int _S;

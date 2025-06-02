@@ -13,12 +13,11 @@ import org.slf4j.LoggerFactory;
 /**
  * JUNCTIONCONTROLER
  * controlls the whole junction and phase switching.
- *
- *
- * Contains 4 roads - onw for each compass direction.
- * 
- * 
- */
+ *	- phase switching
+ 	- timing (scheduling)
+	- car arrivals
+	- logging
+ **/
 public class JunctionController {
 	
 	public enum PhaseValue { //pre-set values for each phase

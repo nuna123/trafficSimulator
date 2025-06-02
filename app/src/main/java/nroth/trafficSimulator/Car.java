@@ -4,7 +4,8 @@ import java.util.Random;
 
 
  /**
- * Car - Simple class used to populate queue in {@link Road}.
+ * CAR
+ * Simple class used to populate queue in {@link Road}.
  *
  * The field 'posInJunction' indicates the car's current position relative to the junction:
  *	posInJunction <= 0	: Car is in the queue.
@@ -25,14 +26,19 @@ public class Car {
 
 	private final static Random _random = new Random();
 
-	public Car (int len, float position, int S)
+
+	public Car (int len, float position, int secToCross)
 	{
 		this.length = len;
 		this.posInJunction = position;
-		this.crossingTime = S * this.length; // to update s, incase different car lengths is implemented
+		this.crossingTime = secToCross * this.length; // to update s, incase different car lengths is implemented
 		this.plate = generatePlate();
 	}
 
+	/**
+	 * random plate generator in format 1AA[1111-9999]
+	 * @return random plate
+	 */
 	private String generatePlate()
 	{
 		int r = _random.nextInt(MAX_ID - MIN_ID + 1) + MIN_ID;
@@ -41,6 +47,6 @@ public class Car {
 	}
 
 	@Override public String toString() {
-		return "Car" + plate +": posInJunction= " + posInJunction;
+		return "Car [" + plate +"]: posInJunction= " + posInJunction;
 	}
 }
