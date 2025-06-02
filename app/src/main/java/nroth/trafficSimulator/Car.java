@@ -17,6 +17,7 @@ import java.util.Random;
 public class Car {
 	private static final int MIN_ID = 1111;
 	private static final int MAX_ID = 9999;
+	private final static Random _random = new Random();
 
 	public final int length;
 	public final int crossingTime;
@@ -24,7 +25,6 @@ public class Car {
 
 	public float posInJunction;
 
-	private final static Random _random = new Random();
 
 
 	public Car (int len, float position, int secToCross)

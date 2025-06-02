@@ -64,9 +64,9 @@ public class ConfigReader {
 		// A[1-4] can be a positive integer, or -1.
 		for (String key : _requiredKeys) {
 			if (!key.startsWith("A") && config.get(key) < 1)
-				throw new MissingKeyException("Value of " + key + " cannot less than 1!");
+				throw new InvalidValueException("Value of " + key + " cannot less than 1!");
 			else if (key.startsWith("A") && config.get(key) != -1 && config.get(key) < 1)
-				throw new MissingKeyException("Value of " + key + " can be a positive integer, or -1.");
+				throw new InvalidValueException("Value of " + key + " can be a positive integer, or -1.");
 		}
 
 		// S cannot be larger than X1/X2, how would a car cross the road?

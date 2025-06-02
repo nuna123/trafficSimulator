@@ -11,51 +11,57 @@
 
 
 class Car {
-	- static final int MIN_ID
-	- static final int MAX_ID
-	- static final Random _random
-	+ final int length
-	+ final int crossingTime
-	+ final String plate
-	+ float posInJunction
+	- static final int MIN_ID;
+	- static final int MAX_ID;
+	- final static Random _random;
+	+ final int length;
+	+ final int crossingTime;
+	+ final String plate;
+	+ float posInJunction;
 
 	- String generatePlate()
-	+ Car(int len, float position, int S)
+	+ Car (int len, float position, int secToCross)
 	+ String toString()
 }
 
 class Road {
-	- final int _S
-	- final Queue<Car> _carsQueue
+	- final int _S;
+	- final String _roadName;
+	- final Queue<Car> _carsQueue;
 
-	+ Road(int S)
+	+ Road(int S, String roadname)
 	+ Car addCar()
 	+ Car addCar(int carLength)
 	+ void removeCar()
 	+ int getQueueLen()
 	+ Queue<Car> getQueue()
 	+ Map<String, Integer> greenLight_tick(int secInLight)
-	+ void printRoad()
+	+ String toString()
 }
 
 class JunctionController {
-	- final Map<String, Integer> _config
-	- final int[] _carArrivals
-	- final Road[] _roads
-	- final JunctionPhase _currentPhase
-	- final Object threadLock
-	- int _totalCarsPassed
-	- static int _elapsedTime
 
-	+ JunctionController(Map<String, Integer> config)
+	- final Map<String, Integer> _config;
+	- final int[] _carArrivals;
+	- final Road[] _roads;
+	- final JunctionPhase _currentPhase;
+	- final Object threadLock;
+	- static final Logger _logger;
+	- int _totalCarsPassed;
+	- static int _elapsedTime;
+
+	- void switchPhase ()
 	+ Road[] getRoads()
 	+ Map<String, Integer> getConfig()
 	+ JunctionPhase getPhase()
+	+ JunctionController(Map<String, Integer> config)
 	+ void addCar(char roadChar)
 	+ void addCar(char roadChar, int carNum)
 	+ Map<String, Object> getJunctionState()
-	+ static void print(String msg)
-	+ void printJunction()
+	+ String summary()
+	+ static void log (String msg)
+	+ static void log (String msg, String style)
+	+ static void printDebug (String msg)
 	+ void tick()
 	+ void start(int timeLimit_sec)
 }
@@ -66,17 +72,33 @@ enum PhaseValue {
 }
 
 class JunctionPhase {
-	- PhaseValue phase
-	- int len
-	- int phaseTimer
-	- int carsPassed
-	- int carsOnRoad
+	+ PhaseValue phase;
+	+ int len;
+	+ int phaseTimer;
+	+ int carsPassed;
+	+ int carsOnRoad;
 
 	- int getPhaseLen()
+	+ void resetPhase()
 	+ JunctionPhase()
 	+ void switchPhase()
 	+ void update(Map<String, Integer> road1, Map<String, Integer> road2)
 	+ String toString()
+}
+
+class ConfigReader {
+	- String _filePath
+	- Map<String, Integer> _mappedConfig
+	- static List<String> _requiredKeys
+
+	- void validateValues (Map<String, Integer> config)
+	- Map<String, Integer> propertiesToMap(Properties properties)
+	+ String getFilePath ()
+	+ Map<String, Integer> getMappedConfig ()
+	+ List<String> getRequiredKeys ()
+	+ ConfigReader(String path)
+	+ Map<String, Integer> readConfigFile()
+
 }
 
 ' Relationships

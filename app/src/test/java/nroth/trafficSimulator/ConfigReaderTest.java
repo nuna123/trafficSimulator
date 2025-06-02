@@ -1,20 +1,11 @@
 package nroth.trafficSimulator;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ConfigReaderTest {
@@ -73,7 +64,8 @@ public class ConfigReaderTest {
 	@Test
 	public void testNegativeValue() throws Exception {
 		assertThrows(ConfigReader.InvalidValueException.class, () -> {
-			new ConfigReader(NEGATIVE_VALUE_CONFIG);
+			ConfigReader cr = new ConfigReader(NEGATIVE_VALUE_CONFIG);
+			cr.readConfigFile();
 		});
 	}
 

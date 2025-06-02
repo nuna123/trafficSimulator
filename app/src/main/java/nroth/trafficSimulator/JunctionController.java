@@ -153,9 +153,10 @@ public class JunctionController {
 
 	public static void log (String msg, String style)
 	{
-		String fullMessage = String.format("%s%s\033[0m", style, msg);
-
-		JunctionController.log (fullMessage);
+		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
+		
+		_logger.info(fullMessage);
+		System.out.println(style + fullMessage + "\033[0m");
 	}
 
 	/**
@@ -173,10 +174,10 @@ public class JunctionController {
 	 */
 	private void switchPhase ()
 	{
-		int secondRoadOffset;
 
-		JunctionController.log("--------Phase switch!-----------------", "\033[1m");
-		JunctionController.log("last phase overview: \n\t\t" + _currentPhase);
+		int secondRoadOffset;
+		String phaseSwitchMsg = "--------Phase switch!-----------------\n";
+		phaseSwitchMsg += ("\tlast phase overview: \n\t\t" + _currentPhase + "\n");
 		this._totalCarsPassed += _currentPhase.carsPassed;
 
 		secondRoadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 1 : 0);
@@ -185,17 +186,19 @@ public class JunctionController {
 			_currentPhase.switchPhase();
 		else
 		{
-			JunctionController.log("[!] Phase not switched! no cars on other road.");
+			phaseSwitchMsg += ("[!] Phase not switched! no cars on other road.\n");
 			_currentPhase.resetPhase();
 		}
 
-		JunctionController.log("\tNew phase: " + _currentPhase.phase.name());
+		phaseSwitchMsg += ("\tNew phase: " + _currentPhase.phase.name()+ "\n");
 
-		JunctionController.log(String.format("\tCar Queues:\tN [%d] ; E [%d] ; S [%d] ; W :[%d]",
+		phaseSwitchMsg += (String.format("\tCar Queues:\tN [%d] ; E [%d] ; S [%d] ; W :[%d]\n",
 				_roads[0].getQueueLen(),
 				_roads[1].getQueueLen(),
 				_roads[2].getQueueLen(),
 				_roads[3].getQueueLen()));
+		
+		JunctionController.log(phaseSwitchMsg, "\033[1m"); // add bold style
 
 	}
 
@@ -295,11 +298,11 @@ public class JunctionController {
 	 * contains phase timing, length, and information about cars on the road
 	 */
 	public class JunctionPhase {
-		PhaseValue phase;
-		int len;
-		int phaseTimer;
-		int carsPassed;
-		int carsOnRoad;
+		public PhaseValue phase;
+		public int len;
+		public int phaseTimer;
+		public int carsPassed;
+		public int carsOnRoad;
 
 		public void resetPhase()
 		{
