@@ -35,6 +35,7 @@ public class ConfigReader {
 			throws FileNotFoundException, IOException
 	{
 		InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream(path);
+		// InputStream inputStream = getClass().getResource(path).openStream();
 		if (inputStream == null) {
 			throw new FileNotFoundException(path + ": Config file not found!");
 		}
