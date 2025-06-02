@@ -29,8 +29,7 @@ public class App {
 			System.out.println("\nconfig is null, exiting....");
 			return;
 		}
-		System.out.println("MAIN: CONFIG:" + config);
-
+		JunctionController.log("MAIN: CONFIG:" + config);
 
 		JunctionController jc = new JunctionController(config);
 
@@ -45,6 +44,6 @@ public class App {
 
 		jc.start(-1);
 
-		JunctionController.printToLog("MAIN: Back in main. exiting ...");
+		JunctionController.log("MAIN: Back in main. exiting ...");
 	}
 }

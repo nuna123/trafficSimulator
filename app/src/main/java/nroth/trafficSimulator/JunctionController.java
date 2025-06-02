@@ -10,22 +10,29 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * JUNCTIONCONTROLER
+ * controlls the whole junction and phase switching.
+ *
+ *
+ * Contains 4 roads - onw for each compass direction.
+ * 
+ * 
+ */
 public class JunctionController {
-	public enum PhaseValue {
+	
+	public enum PhaseValue { //pre-set values for each phase
 		NS_GREEN, EW_GREEN
 	}
+	private final Map<String, Integer> _config;	// config map obtained from ConfigReader class
+	private final int[] _carArrivals;			// timing of car arrival to roads
+	private final Road[] _roads;				// Road class objects, array of 4 - one for each compass direction
+	private final JunctionPhase _currentPhase;	// Custom class containing all information about the current phase
+	private final Object threadLock = new Object(); // threadLock for thread running the task scheduler
+	private static final Logger _logger = LoggerFactory.getLogger(App.class); // Logger - static so can be used without initialization
+	private int _totalCarsPassed;				// counter for total cars that safely pass through the junction
+	private static int _elapsedTime = 0;		// elapsed time since beginning of simulation
 
-	private final Map<String, Integer> _config;
-	private final int[] _carArrivals;
-	private final Road[] _roads;
-	private final JunctionPhase _currentPhase;
-	private final Object threadLock = new Object();
-	private static final Logger _logger = LoggerFactory.getLogger(App.class);
-
-
-	private int _totalCarsPassed;
-	private static int _elapsedTime = 0;
 
 	public Road[] getRoads() {return _roads;}
 	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
@@ -106,7 +113,6 @@ public class JunctionController {
 
 	}
 
-
 	/**
 	 * get Junction summary
 	 * @return
@@ -121,7 +127,7 @@ public class JunctionController {
 		out += ("\n---- JUNCTION SUMMARY ----\n");
 		out += String.format("Elapsed time: %d\n", js.get("elapsedTime"));
 		out += String.format("Cars on road: %d\n", js.get("carsOnRoad"));
-		out += ("Current Queues:");
+		out += ("Current Queues:\n");
 		out += String.format("  North: %d\n", queues.get("North"));
 		out += String.format("  East:  %d\n", queues.get("East"));
 		out += String.format("  South: %d\n", queues.get("South"));
@@ -138,11 +144,21 @@ public class JunctionController {
 	 * Is static to allow printing using the correct time value without instantiating JunctionController
 	 * @param msg
 	 */
-	public static void printToLog (String msg)
+	public static void log (String msg)
 	{
-		_logger.info(String.format("[%ds]\t%s", _elapsedTime, msg));
-		System.out.printf(String.format("[%ds]\t%s\n", _elapsedTime, msg));
+		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
+
+		_logger.info(fullMessage);
+		System.out.println(fullMessage);
 	}
+
+	public static void log (String msg, String style)
+	{
+		String fullMessage = String.format("%s%s\033[0m", style, msg);
+
+		JunctionController.log (fullMessage);
+	}
+
 	/**
 	 * logs a formatted version of msg with time, as debug message
 	 * Is static to allow printing using the correct time value without instantiating JunctionController
@@ -153,36 +169,36 @@ public class JunctionController {
 		_logger.debug(String.format("[%ds]\t%s", _elapsedTime, msg));
 	}
 
-
 	/**
 	 * handles phase switching, evaluates if switch is needed - if cars are waiting on the perpendicular road
 	 */
 	private void switchPhase ()
 	{
-		JunctionController.printToLog("--------Phase switch!");
-		JunctionController.printToLog("\tphase overview: " + _currentPhase);
+		int secondRoadOffset;
+
+		JunctionController.log("--------Phase switch!-----------------", "\033[1m");
+		JunctionController.log("last phase overview: \n\t\t" + _currentPhase);
 		this._totalCarsPassed += _currentPhase.carsPassed;
 
-		int secondRoadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 1 : 0);
+		secondRoadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 1 : 0);
 		//if there are cars on the other side
 		if (_roads[0 + secondRoadOffset].getQueueLen() + _roads[2 + secondRoadOffset].getQueueLen() > 0)
 			_currentPhase.switchPhase();
 		else
 		{
-			JunctionController.printToLog("[!] Phase not switched! no cars on other road.");
+			JunctionController.log("[!] Phase not switched! no cars on other road.");
 			_currentPhase.resetPhase();
 		}
 
-		JunctionController.printToLog("\tNew phase: " + _currentPhase);
+		JunctionController.log("\tNew phase: " + _currentPhase.phase.name());
 
-		JunctionController.printToLog(String.format("\tCar Queues:\tNorth(%d) ; East(%d) ; South(%d) ; West:(%d)",
+		JunctionController.log(String.format("\tCar Queues:\tN [%d] ; E [%d] ; S [%d] ; W :[%d]",
 				_roads[0].getQueueLen(),
 				_roads[1].getQueueLen(),
 				_roads[2].getQueueLen(),
 				_roads[3].getQueueLen()));
 
 	}
-
 
 	/**
 	 * A function to be run every second(1 tick) of the function
@@ -224,7 +240,8 @@ public class JunctionController {
 	{
 		if (timeLimit_sec < -1)
 		{
-			throw new IllegalArgumentException("timeLimit_sec must bea positive int, or -1 for indefinite run.");
+			throw new IllegalArgumentException
+				("timeLimit_sec must bea positive int, or -1 for indefinite run.");
 		}
 
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -234,10 +251,10 @@ public class JunctionController {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			if (JunctionController._elapsedTime < timeLimit_sec)
 			{
-				JunctionController.printToLog("[!] Non-peaceful termination: Ctrl+C");
+				JunctionController.log("[!] Non-peaceful termination: Ctrl+C");
 				scheduler.shutdownNow();  // Optional: force shutdown
 			}
-			JunctionController.printToLog(this.summary());
+			JunctionController.log(this.summary());
 		}));
 
 		// the synchronized block makes sure only 1 thread can run this runnable at a
@@ -253,12 +270,12 @@ public class JunctionController {
 					this.tick();
 				else{
 					scheduler.shutdown();
-					JunctionController.printToLog("[!] Time limit reached! Shutting down scheduler.");
+					JunctionController.log("[!] Time limit reached! Shutting down scheduler.");
 				}
 			}
 		};
 
-		JunctionController.printToLog("From JunctionController: starting simulation...");
+		JunctionController.log("From JunctionController: starting simulation...");
 		int tickInterval = 1; // 1sec
 
 		scheduler.scheduleAtFixedRate(task, 0, tickInterval, TimeUnit.SECONDS);
