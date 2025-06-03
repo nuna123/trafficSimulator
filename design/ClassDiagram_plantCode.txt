@@ -32,7 +32,6 @@ class Road {
 	+ Road(int S, String roadname)
 	+ Car addCar()
 	+ Car addCar(int carLength)
-	+ void removeCar()
 	+ int getQueueLen()
 	+ Queue<Car> getQueue()
 	+ Map<String, Integer> greenLight_tick(int secInLight)

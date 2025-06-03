@@ -120,13 +120,9 @@ class JunctionControllerTest {
 
 	@Test
 	void testTickCarArrivals() throws Exception {
-		// Clear all roads
+		// Roads should all already be clear
 		Road[] roads = controller.getRoads();
-		for (Road road : roads) {
-			while (road.getQueueLen() > 0) {
-				road.removeCar();
-			}
-		}
+		
 		// Simulate ticks and check arrivals
 		for (int t = 1; t <= 12; t++) {
 			controller.tick();

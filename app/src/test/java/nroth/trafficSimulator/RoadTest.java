@@ -28,7 +28,7 @@ class RoadTest {
 		roadLen = controller.getQueueLen();
 
 		assertEquals(1, roadLen); //only 1 car in queue
-		assertEquals(controller.getQueue().peek(), addedCar); //car added is the new car
+		assertEquals(controller.getWaitingCars().peek(), addedCar); //car added is the new car
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class RoadTest {
 		Car addedCar = controller.addCar();
 		for (int i = 0;i ++ < 5;){controller.addCar();}
 
-		assertEquals(addedCar, controller.getQueue().peek()); //first car in queue is the car that was added first
+		assertEquals(addedCar, controller.getWaitingCars().peek()); //first car in queue is the car that was added first
 	}
 
 	@Test
@@ -88,8 +88,8 @@ class RoadTest {
 	@Test
 	public void testGetQueueReturnsCopy() {
 		controller.addCar();
-		Queue<Car> queue1 = controller.getQueue();
-		Queue<Car> queue2 = controller.getQueue();
+		Queue<Car> queue1 = controller.getWaitingCars();
+		Queue<Car> queue2 = controller.getWaitingCars();
 		assertEquals(queue1, queue2);
 		queue1.poll();
 		// Original queue should not be affected
