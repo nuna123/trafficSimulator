@@ -40,17 +40,17 @@ $ ./gradlew run
 Example console output:
 
 ```
-[0s]    MAIN: CONFIG:{A1=-1, A2=2, A3=3, S=4, A4=3, X1=5, X2=6}
-[0s]    From JunctionController: starting simulation...
-[2s]    West: Car [1AA2144] Arrived
-[3s]    South: Car [1AA4248] Arrived
-[3s]    East: Car [1AA1186] Arrived
-[4s]    West: Car [1AA3198] Arrived
-[5s]        --------Phase switch!-----------------
-        last phase overview: 
-                Phase: NS_GREEN; len: 5; timer: 5; carsPassed: 0; carsOnRoad: 0
-        New phase: EW_GREEN
-        Car Queues:     N [0] ; E [2] ; S [1] ; W :[1]
+[0s]	 MAIN: CONFIG:{A1=-1, A2=2, A3=3, S=4, A4=3, X1=5, X2=6}
+[0s]	 From JunctionController: starting simulation...
+[2s]	 West: Car [1AA2144] Arrived
+[3s]	 South: Car [1AA4248] Arrived
+[3s]	 East: Car [1AA1186] Arrived
+[4s]	 West: Car [1AA3198] Arrived
+[5s]		  --------Phase switch!-----------------
+		last phase overview: 
+				Phase: NS_GREEN; len: 5; timer: 5; carsPassed: 0; carsOnRoad: 0
+		New phase: EW_GREEN
+		Car Queues:	  N [0] ; E [2] ; S [1] ; W :[1]
 ```
 
 Press **Ctrl+C** to terminate and print a final summary table.
@@ -61,19 +61,19 @@ Press **Ctrl+C** to terminate and print a final summary table.
 
 The simulator reads `config.properties` from the classpath. Default config in `/src/main/resources/`
 
- All values are integers:
-| Variable | Description                                      |
+All values are positive integers:
+| Variable | Description												  |
 |----------|--------------------------------------------------|
-| `X1`     | Duration of Phase A (North-South green light)    |
-| `X2`     | Duration of Phase B (East-West green light)      |
-| `S`      | Time taken by a car to cross the intersection    |
-| `A1`     | Arrival interval of cars from **North** (Road 1) |
-| `A2`     | Arrival interval of cars from **East** (Road 2)  |
-| `A3`     | Arrival interval of cars from **South** (Road 3) |
-| `A4`     | Arrival interval of cars from **West** (Road 4)  |
+| `X1`	  | Duration of Phase A (North-South green light)	 |
+| `X2`	  | Duration of Phase B (East-West green light)		|
+| `S`		| Time taken by a car to cross the intersection	 |
+| `A1`	  | Arrival interval of cars from **North** (Road 1) |
+| `A2`	  | Arrival interval of cars from **East** (Road 2)  |
+| `A3`	  | Arrival interval of cars from **South** (Road 3) |
+| `A4`	  | Arrival interval of cars from **West** (Road 4)  |
 
+*All values must be present in order for the program to run*
 Note: `A[1-4]` may be set to -1 to disable road arrivals
-
 **Rule checks** performed by `ConfigReader`:
 * All required keys (`X1`, `X2`, `S`, `A1‑A4`) must be present.
 * `S` may not exceed `X1` or `X2`.
@@ -93,30 +93,31 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 ### Project Structure
 ```
 .
-├── app/                             # Main application module
-│   ├── bin/                         # Compiled binaries
-│   ├── build.gradle                 # Gradle build script for the app module
-│   ├── design/						 # class diagrams and code
+├── app/                                   # Main application module
+│   ├── bin/                               # Compiled binaries
+│   ├── build.gradle                       # Gradle build script for the app module
+│   ├── design/                            # Class diagrams and code
 │   └── src/
 │       ├── main/
 │       │   ├── java/nroth/trafficSimulator/
-│       │   │   ├── App.java               # Main application entry point
-│       │   │   ├── Car.java               # Model class for a car in the simulation
+│       │   │   ├── App.java               # Application entry point
+│       │   │   ├── Car.java               # Class for a car in the simulation
 │       │   │   ├── ConfigReader.java      # Loads configuration settings
 │       │   │   ├── JunctionController.java# Manages logic for junctions/intersections
-│       │   │   └── Road.java              # Model class for a road in the simulation
+│       │   │   └── Road.java              # Class for a road in the simulation
 │       │   └── resources/
-│       │       ├── config.properties      # Simulation settings (e.g., durations, limits)
+│       │       ├── config.properties      # Simulation config
 │       │       └── logback.xml            # Logback logging configuration
-│       └── test/                          # Testing files and their resoures
-├── build/                            # Gradle build output (auto-generated)
-├── extras/                           # Extra materials and notes
-├── gradle/                           # Gradle wrapper configuration files
-├── gradle.properties                 # Global Gradle settings
-├── gradlew                           # Gradle wrapper shell script (Linux)
-├── gradlew.bat                       # Gradle wrapper batch script (Windows)
-├── README.md                         # Project documentation
-└── settings.gradle                   # Gradle project settings and modules
+│       └── test/                          # Testing files and their resources
+├── build/                                 # Gradle build output (auto-generated)
+├── extras/                                # Extra materials and notes
+├── gradle/                                # Gradle wrapper configuration files
+├── gradle.properties                      # Global Gradle settings
+├── gradlew                                # Gradle wrapper shell script (Linux)
+├── gradlew.bat                            # Gradle wrapper batch script (Windows)
+├── README.md                              # Project documentation
+└── settings.gradle                        # Gradle project settings and modules
+
 
 ```
 
@@ -184,11 +185,12 @@ JunctionController jc = new JunctionController(config);
 
 // Add queued traffic before the lights turn green
 
-jc.addCar('N', 3); // 3 cars northbound
+jc.addCar('N', 3); // 3 cars from North
 
-jc.addCar('W'); // a single westbound car
+jc.addCar('W'); // 1 car from West
 
 jc.start(120); // run for 120 seconds
+
 ```
 
 ---
