@@ -27,7 +27,7 @@ public class Road {
 	public Car addCar(int carLength){
 		Car newCar = new Car(carLength, getQueueLen() * -1, _S);
 		_carsQueue.add(newCar);
-		JunctionController.log(_roadName + ": Car [" +newCar.plate + "] Arrived");
+		JunctionController.printDebug(_roadName + ": Car [" +newCar.plate + "] Arrived");
 		return newCar;
 	}
 	public Car addCar(){ return addCar(1);}
@@ -66,7 +66,7 @@ public class Road {
 			if (currCar.posInJunction >= 1) //if the car passed the junction
 			{
 				carsPassed += 1;
-				JunctionController.log(_roadName + ": car " + currCar.plate + " has passed!");
+				JunctionController.printDebug(_roadName + ": car " + currCar.plate + " has passed!");
 			}
 			else if (currCar.posInJunction > 0) // if car is currently on road
 				carsOnRoad += 1;

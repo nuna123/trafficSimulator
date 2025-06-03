@@ -27,6 +27,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.4.14' // or latest
 
     // This dependency is used by the application.
+    // Google Core Libraries for Java [https://github.com/google/guava]
     implementation libs.guava
 }
 

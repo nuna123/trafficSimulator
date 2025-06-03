@@ -29,7 +29,6 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 - [x] Write unit tests for Intersection
 
 - [x] Add diagrams - UML
-	- [ ] Sequence/Activity diagram
 
 
 
@@ -73,7 +72,7 @@ ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 
 # GRADLE
 ## what is it?
-A build automation tool that simplifies the process of building and deploying software, particularly for Java.
+A build automation tool that simplifies the process of building and deploying software.
 
 ## DSL (Domain Specific Language)
     The language used to configure build scripts in gradle. Gradle uses either Groovy or Kotlin
@@ -89,7 +88,7 @@ A build automation tool that simplifies the process of building and deploying so
    - even though its newer than Groovy (introduced 2016) has sa ton of online guides
 
 
-## The GradleWrapper
+## The Gradle Wrapper
     The Wrapper is a script that invokes a declared version of Gradle, downloading it beforehand if necessary. Instead of running gradle build using the installed Gradle, you use the Gradle Wrapper by calling ./gradlew build.
     - allows to run a gradle project without having gradle installed on your system.
     - makes sure the same version of gradle is used for builds by different devs

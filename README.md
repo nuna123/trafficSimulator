@@ -227,4 +227,6 @@ Unit tests are implemented with JUnit5. run them with:
 	Let green light phases times adapt according to the car queues or wait times.
  - **Grid position system**
 	A grid-based system with car position and dimentions to detect collisions.
+ - **Improved timing**
+	Currently the scheduler runs every second, and all values are controlled by it. if there was a separate thread to manage car arrivals for example, theyd be able to arrival in shorter intervals.
 
