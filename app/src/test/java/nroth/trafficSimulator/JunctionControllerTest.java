@@ -106,10 +106,14 @@ class JunctionControllerTest {
 	void testAddCarValid() throws Exception {
 		controller.addCar('N');
 		controller.addCar('E', 2);
+		controller.addCar('S', 5);
+		controller.addCar('W', 12);
 
 		Road[] roads = controller.getRoads();
 		assertEquals(1, roads[0].getQueueLen());
-		assertEquals(2, roads[3].getQueueLen());
+		assertEquals(2, roads[1].getQueueLen());
+		assertEquals(5, roads[2].getQueueLen());
+		assertEquals(12, roads[3].getQueueLen());
 	}
 
 	@Test

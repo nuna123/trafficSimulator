@@ -42,7 +42,7 @@ public class JunctionController {
 		_currentPhase = new JunctionPhase();
 
 		_roads = new Road[4];
-		String[] roadnames = {"North", "West", "South", "East"};
+		String[] roadnames = {"North", "East", "South", "West"};
 		for (int i = 0; i < 4; i++)
 			_roads[i] = new Road(_config.get("S"), roadnames[i]);
 
@@ -72,9 +72,9 @@ public class JunctionController {
 			throws Exception {
 		Road myRoad = (switch (roadChar) {
 			case 'N' -> _roads[0];
-			case 'W' -> _roads[1];
+			case 'E' -> _roads[1];
 			case 'S' -> _roads[2];
-			case 'E' -> _roads[3];
+			case 'W' -> _roads[3];
 			default -> null;
 		});
 		if (myRoad == null)
