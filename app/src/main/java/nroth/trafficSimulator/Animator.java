@@ -166,6 +166,13 @@ public class Animator {
 				"                    SOUTH                  "
 			};
 		
+		String[] colorMap;
+		public JunctionMap()
+		{
+			colorMap =  new String[mapStringArr.length + 1];
+			for (int i= 0; i < colorMap.length; i++)
+				colorMap[i] = new String(new char[45]).replace('\0', ' ');
+		}
 		public void addTitles (int[] carQueues){
 
 			int[][] titlePos = {
@@ -191,7 +198,6 @@ public class Animator {
 
 		}
 
-
 		public void addChar(char c, int[] pos) {
 			if (pos[0] < 0 || pos[0] >= mapStringArr[0].length()
 			|| pos[1] < 0 || pos[1] >= mapStringArr.length )
@@ -208,8 +214,54 @@ public class Animator {
 			addChar(carChar, pos);
 		}
 
+		public void addToColorMap(int[] pos, int dirIdx)
+		{
+			if (pos[0] < 0 || pos[0] >= mapStringArr[0].length()
+			|| pos[1] < 0 || pos[1] >= mapStringArr.length )
+				return;
+			System.out.println(pos[0] + ", " + pos[1]);
+			String row = (colorMap[pos[1]]);
+			char[] row_c =row.toCharArray();
+			row_c[pos[0]] = (char) (dirIdx + (int)'0');
 
+			colorMap[pos[1]] = new String(row_c);
 
+		}
+
+		public void printWithColor ()
+		{
+			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
+			String resetColor = "\u001B[0m";
+			String[] colorArr = {
+				"\u001B[31m",
+				"\u001B[32m",
+				"\u001B[33m",
+				"\u001B[34m"
+			};
+
+			char colorChar;
+			for (int y = 0; y <  mapStringArr.length ; y++)
+			{
+				if (colorMap[y] == null)
+					System.out.println(mapStringArr[y]);
+				else 
+				{
+					for (int x = 0; x < mapStringArr[y].length() ; x++)
+					{
+						colorChar = colorMap[y].toCharArray()[x];
+						if (colorChar != ' ')
+						{
+							colorChar -= '0';
+							System.out.printf("%s%c%s", colorArr[colorChar], mapStringArr[y].toCharArray()[x], resetColor);
+						}
+						else
+							System.out.print(mapStringArr[y].toCharArray()[x]);
+						}
+					System.out.print("\n");
+				}
+				
+			}
+		}
 		public void print ()
 		{
 			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
@@ -228,13 +280,14 @@ public class Animator {
 		 */
 		// public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
 
-		public void addAllCars(Function<Car, int[]> func,  LinkedList<Car> cars)
+		public void addAllCars(Function<Car, int[]> func, int dirIdx, LinkedList<Car> cars)
 		{
 			cars.forEach((Car c) -> {
 
 				int[] pos;
 				pos = func.apply(c);
-					addCar(pos);
+				addCar(pos);
+				addToColorMap(pos, dirIdx);
 
 			});
 		}
@@ -256,7 +309,7 @@ public class Animator {
 			if (dirIdx == 3)
 				System.out.println("WEST");
 			if (func != null)
-				addAllCars(func,  allCars);
+				addAllCars(func, dirIdx, allCars);
 		}
 
 		/* 
@@ -316,7 +369,8 @@ public class Animator {
 		newMap.addTitles(carQueues);
 		
 		// newMap.addCar(carsOnRoad);
-		newMap.print();
+		// newMap.print();
+		newMap.printWithColor();
 
 		return newMap;
 	}
