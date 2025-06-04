@@ -92,9 +92,25 @@ public class Animator {
 
 			return new int[]{lanePointZero[0], pos};
 		}
+		public static int[] calcCarPos_S(Car c)
+		{
+			int[] lanePointZero = {25, 10};
+			float laneSize = 5;
+			int pos = lanePointZero[1];
+
+			//x stays the same, y needs to be changed.
+			if (c.posInJunction <= 0)
+				pos -= c.posInJunction;
+			else if (c.posInJunction > 0 && c.posInJunction < 1)
+				pos -= 1 + (laneSize * c.posInJunction);
+			else // if pos > 1
+				pos -= laneSize + (c.posInJunction);
+
+			return new int[]{lanePointZero[0], pos};
+		}
 		public static int[] calcCarPos_W(Car c)
 		{
-			int[] lanePointZero = {15, 6};
+			int[] lanePointZero = {15, 8};
 			float laneSize = 13;
 			int pos = lanePointZero[0];
 
@@ -105,6 +121,22 @@ public class Animator {
 				pos += 1 + (laneSize * c.posInJunction);
 			else // if pos > 1
 				pos += laneSize + (c.posInJunction);
+
+			return new int[]{pos, lanePointZero[1]};
+		}
+		public static int[] calcCarPos_E(Car c)
+		{
+			int[] lanePointZero = {29, 6};
+			float laneSize = 13;
+			int pos = lanePointZero[0];
+
+			//y stays the same, x needs to be changed.
+			if (c.posInJunction <= 0)
+				pos -= c.posInJunction;
+			else if (c.posInJunction > 0 && c.posInJunction < 1)
+				pos -= 1 + (laneSize * c.posInJunction);
+			else // if pos > 1
+				pos -= laneSize + (c.posInJunction);
 
 			return new int[]{pos, lanePointZero[1]};
 		}
@@ -214,6 +246,8 @@ public class Animator {
 			Function<Car, int[]> func = null;
 			switch (dirIdx) {
 				case 0:  func = calcCarPositions::calcCarPos_N; break;
+				case 1:  func = calcCarPositions::calcCarPos_E; break;
+				case 2:  func = calcCarPositions::calcCarPos_S; break;
 				case 3:  func = calcCarPositions::calcCarPos_W; break;
 				default:
 					break;
