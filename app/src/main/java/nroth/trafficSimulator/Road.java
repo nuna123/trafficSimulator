@@ -67,7 +67,8 @@ public class Road {
 		while (carIterator.hasNext())
 		{
 			currCar = carIterator.next();
-			currCar.posInJunction += 1 / currCar.crossingTime;
+			currCar.posInJunction = currCar.posInJunction + (1.0f / currCar.crossingTime);
+			// currCar.posInJunction = currCar.posInJunction + 1 / currCar.crossingTime;
 
 			if (currCar.posInJunction >= 1)
 			{
@@ -76,7 +77,7 @@ public class Road {
 				passedCars ++;
 			}
 		}
-		_passedCarsQueue.removeAll(_passedCarsQueue);
+		_carsOnRoad.removeAll(_passedCarsQueue);
 		return passedCars;
 	}
 
