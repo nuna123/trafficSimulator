@@ -22,11 +22,11 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Logback for logging
-    implementation 'org.slf4j:slf4j-api:2.0.9' // or latest
-    // implementation 'org.slf4j:slf4j-simple:2.0.9'
-    implementation 'ch.qos.logback:logback-classic:1.4.14' // or latest
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
 
-    // This dependency is used by the application.
+    // Google Lanterna for displaying in a separate terminal
+    implementation 'com.googlecode.lanterna:lanterna:3.1.3'
     // Google Core Libraries for Java [https://github.com/google/guava]
     implementation libs.guava
 }
@@ -34,7 +34,7 @@ dependencies {
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 

@@ -1,9 +1,13 @@
 package nroth.trafficSimulator;
 
 import java.util.LinkedList;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Function;
+
+import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 /**
 * [                    NORTH                 ] 0
@@ -50,6 +54,10 @@ import java.util.function.Function;
 */
 
 public class Animator {
+
+	private final Terminal _terminal;
+
+	//holder for the car position calculation functions
 	public class calcCarPositions {
 		public static int[] calcCarPos_N(Car c)
 		{
@@ -156,6 +164,8 @@ public class Animator {
 				"                    SOUTH                  "
 			};
 	}
+	
+	//actual map handling
 	private class JunctionMap{
 
 		String[] mapStringArr;
@@ -220,6 +230,34 @@ public class Animator {
 			colorMap[pos[1]] = new String(row_c);
 		}
 
+		public void addAllCars(Function<Car, int[]> func, int dirIdx, LinkedList<Car> cars)
+		{
+			cars.forEach((Car c) -> {
+				int[] pos;
+				pos = func.apply(c);
+				addCar(pos);
+				addToColorMap(pos, dirIdx);
+
+			});
+		}
+
+		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
+		{
+			Function<Car, int[]> func = null;
+
+			switch (dirIdx) {
+				case 0:  func = calcCarPositions::calcCarPos_N; break;
+				case 1:  func = calcCarPositions::calcCarPos_E; break;
+				case 2:  func = calcCarPositions::calcCarPos_S; break;
+				case 3:  func = calcCarPositions::calcCarPos_W; break;
+				default:
+					break;
+			
+			}
+			if (func != null)
+				addAllCars(func, dirIdx, allCars);
+		}
+
 		public void printWithColor ()
 		{
 			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
@@ -256,34 +294,17 @@ public class Animator {
 			}
 		}
 
-		public void addAllCars(Function<Car, int[]> func, int dirIdx, LinkedList<Car> cars)
+		public void printOnTerminal ()
 		{
-			cars.forEach((Car c) -> {
-				int[] pos;
-				pos = func.apply(c);
-				addCar(pos);
-				addToColorMap(pos, dirIdx);
-
-			});
+			//TODO: print on  _terminal
+			// https://github.com/mabe02/lanterna/blob/master/docs/tutorial/Tutorial02.md
 		}
+	}
 
-		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
-		{
-			Function<Car, int[]> func = null;
-
-			switch (dirIdx) {
-				case 0:  func = calcCarPositions::calcCarPos_N; break;
-				case 1:  func = calcCarPositions::calcCarPos_E; break;
-				case 2:  func = calcCarPositions::calcCarPos_S; break;
-				case 3:  func = calcCarPositions::calcCarPos_W; break;
-				default:
-					break;
-			
-			}
-			if (func != null)
-				addAllCars(func, dirIdx, allCars);
-		}
-
+	public Animator ()
+	throws IOException
+	{
+		_terminal =  (new DefaultTerminalFactory()).createTerminal();
 	}
 
 	JunctionMap configureFrame(JunctionController jc)
@@ -318,6 +339,7 @@ public class Animator {
 		newMap.addTitles(carQueues);
 		
 		newMap.printWithColor();
+		newMap.printOnTerminal();
 		var jc_state = jc.getJunctionState();
 		String msg = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
 		System.out.printf("[%ds]\t%s\n", jc_state.get("elapsedTime"), msg);
