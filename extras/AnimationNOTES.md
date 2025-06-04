@@ -50,18 +50,22 @@
 	W = [9,7]
 
 
-##
-	TODO:
+
+# To test:
+	when s > lane width?
+
+#	TODO:
+
 	[x] - cars passing the junction should also be printed. the structure of Road needs to keep and advance passing cars.
-	[ ] - Car directions:
+	[x] - Car directions:
 		[x] - North
-		[ ] - South
-		[ ] - East
+		[x]- South
+		[x] - East
 		[x] - West
 	[ ] - current phase title
 	[ ] - timer title
 	[ ] - total passed cars? per road counter?
-	[ ] - Colors??
+	[x] - Colors??
 	
 
 

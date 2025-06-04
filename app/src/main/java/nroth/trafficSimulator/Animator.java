@@ -1,9 +1,8 @@
 package nroth.trafficSimulator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.Function;
 
 /**
@@ -49,32 +48,8 @@ import java.util.function.Function;
 	E = [36,7]
 	W = [9,7]
 */
-	// public class Constants{
-	// 	public int[] getCarPosition (char dir, int carPos)
-	// 			throws Exception{
-	// 		int[] res = (switch (dir) {
-	// 			case 'N' -> new int[]{19, carPos};
-	// 			case 'W' -> new int[]{25, carPos};
-	// 			case 'S' -> new int[]{carPos, 6};
-	// 			case 'E' -> new int[]{carPos, 8};
-	// 			default -> null;
-	// 		});
-	// 		if (res == null)
-	// 			throw new Exception("Invalid value: " + dir);
-	// 		return res;
-	// 	}
 
-	// 	public int getLaneSize (char dir, int carPos)
-	// 	{
-	// 		return
-	// 			(dir == 'N' || dir == 'S'
-	// 				? 5
-	// 				: (dir == 'E' || dir == 'W' ? 13 : -1));
-	// 	}
-
-	// 	public int[] getStartPosition (char dir, int carPos)
 public class Animator {
-	private String[] _roadchars = {"N", "E", "S", "W"};
 	public class calcCarPositions {
 		public static int[] calcCarPos_N(Car c)
 		{
@@ -140,13 +115,28 @@ public class Animator {
 
 			return new int[]{pos, lanePointZero[1]};
 		}
-		
 	}
-	private class JunctionMap{
-		private char carChar = 'X';
-		int[][] map_limits = {{11,33}, {2,12}};
 
-		String[] mapStringArr =
+	//constants needed for displaying
+	public class constants
+	{
+		final static char carChar = 'X';
+		final static int[][] map_limits = {{11,33}, {2,12}};
+		final static int[][] titlePos = {
+				{21, 1}, //N
+				{36, 7}, //E
+				{22, 14}, //S
+				{7, 7} //W
+			};
+		final static String resetColor = "\u001B[0m";
+		final static String[] colorArr = {
+				"\u001B[31m", // North 
+				"\u001B[32m", //East
+				"\u001B[33m", //South
+				"\u001B[34m" //West
+			};
+
+		final static String[] mapStringArr =
 			{
 				"                    NORTH                  ",
 				"                |   (  )    |              ",
@@ -165,40 +155,42 @@ public class Animator {
 				"                |    (  )   |              ",
 				"                    SOUTH                  "
 			};
-		
+	}
+	private class JunctionMap{
+
+		String[] mapStringArr;
 		String[] colorMap;
+
 		public JunctionMap()
 		{
+			mapStringArr = Arrays.stream(constants.mapStringArr).toArray(String[]::new);
 			colorMap =  new String[mapStringArr.length + 1];
+
 			for (int i= 0; i < colorMap.length; i++)
 				colorMap[i] = new String(new char[45]).replace('\0', ' ');
 		}
+		
 		public void addTitles (int[] carQueues){
-
-			int[][] titlePos = {
-				{21, 1}, //N
-				{36, 7}, //E
-				{22, 14}, //S
-				{7, 7} //W
-			};
-
-			
-
 			char[] chararr;
+			int[] titlePos;
+
 			for (int i = 0; i < carQueues.length ; i++)
 			{
+				titlePos = constants.titlePos[i];
+
+				//max 2 digits
 				if (carQueues[i] > 99)
 					carQueues[i] = 99;
 
 				chararr = String.format("%2s", String.valueOf(carQueues[i])).toCharArray();
 
-				addChar(chararr[0], titlePos[i]);
-				addChar(chararr[1], new int[] {titlePos[i][0] + 1, titlePos[i][1]});
+				addChar(chararr[0], titlePos);
+				addChar(chararr[1], new int[] {titlePos[0] + 1, titlePos[1]});
 			}
-
 		}
 
 		public void addChar(char c, int[] pos) {
+			//check that character is within bounds of map
 			if (pos[0] < 0 || pos[0] >= mapStringArr[0].length()
 			|| pos[1] < 0 || pos[1] >= mapStringArr.length )
 				return;
@@ -208,36 +200,31 @@ public class Animator {
 		}
 
 		public void addCar(int[] pos) {
-			if (pos[0] < map_limits[0][0] || pos[0] > map_limits[0][1]
-			|| pos[1] < map_limits[1][0] || pos[1] > map_limits[1][1] )
+			//check that car is within defined map limits
+			if (pos[0] < constants.map_limits[0][0] || pos[0] > constants.map_limits[0][1]
+			|| pos[1] < constants.map_limits[1][0] || pos[1] > constants.map_limits[1][1] )
 				return;
-			addChar(carChar, pos);
+			addChar(constants.carChar, pos);
 		}
 
 		public void addToColorMap(int[] pos, int dirIdx)
 		{
+			//check that car is within defined map array
 			if (pos[0] < 0 || pos[0] >= mapStringArr[0].length()
 			|| pos[1] < 0 || pos[1] >= mapStringArr.length )
 				return;
-			System.out.println(pos[0] + ", " + pos[1]);
 			String row = (colorMap[pos[1]]);
 			char[] row_c =row.toCharArray();
 			row_c[pos[0]] = (char) (dirIdx + (int)'0');
 
 			colorMap[pos[1]] = new String(row_c);
-
 		}
 
 		public void printWithColor ()
 		{
 			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
-			String resetColor = "\u001B[0m";
-			String[] colorArr = {
-				"\u001B[31m",
-				"\u001B[32m",
-				"\u001B[33m",
-				"\u001B[34m"
-			};
+			char[] colorRow;
+			char[] mapRow;
 
 			char colorChar;
 			for (int y = 0; y <  mapStringArr.length ; y++)
@@ -248,42 +235,30 @@ public class Animator {
 				{
 					for (int x = 0; x < mapStringArr[y].length() ; x++)
 					{
-						colorChar = colorMap[y].toCharArray()[x];
+						colorRow = colorMap[y].toCharArray();
+						mapRow = mapStringArr[y].toCharArray();
+
+						colorChar = colorRow[x];
 						if (colorChar != ' ')
 						{
 							colorChar -= '0';
-							System.out.printf("%s%c%s", colorArr[colorChar], mapStringArr[y].toCharArray()[x], resetColor);
+							System.out.printf("%s%c%s",
+								constants.colorArr[colorChar],
+								mapRow[x],
+								constants.resetColor);
 						}
 						else
-							System.out.print(mapStringArr[y].toCharArray()[x]);
-						}
+							System.out.print(mapRow[x]);
+					}
 					System.out.print("\n");
 				}
 				
 			}
 		}
-		public void print ()
-		{
-			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
-
-			for (String i : mapStringArr)
-				System.out.println("|" + i + "|");
-		}
-		/**
-		 *
-		 * @param carsOnRoad {
-		 * 	"N" -> List <Car>
-		 * 	"W" -> List <Car>
-		 * 	"S" -> List <Car>
-		 * 	"E" -> List <Car>
-		 * }
-		 */
-		// public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
 
 		public void addAllCars(Function<Car, int[]> func, int dirIdx, LinkedList<Car> cars)
 		{
 			cars.forEach((Car c) -> {
-
 				int[] pos;
 				pos = func.apply(c);
 				addCar(pos);
@@ -294,9 +269,8 @@ public class Animator {
 
 		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
 		{
-			// System.out.println ("DIR: " + dirIdx);
-			// System.out.println ("CARS: " + allCars);
 			Function<Car, int[]> func = null;
+
 			switch (dirIdx) {
 				case 0:  func = calcCarPositions::calcCarPos_N; break;
 				case 1:  func = calcCarPositions::calcCarPos_E; break;
@@ -306,43 +280,10 @@ public class Animator {
 					break;
 			
 			}
-			if (dirIdx == 3)
-				System.out.println("WEST");
 			if (func != null)
 				addAllCars(func, dirIdx, allCars);
 		}
 
-		/* 
-		public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
-		{
-			JunctionController.printDebug(carsOnRoad.toString());
-			
-			List<int[]> positions;
-			List<Car> cars;
-			int[] pos = {};
-			for (String key : carsOnRoad.keySet())
-			{
-			// String key = "N";
-				positions = new ArrayList<>();
-				cars = carsOnRoad.get(key);
-				for (Car c : cars)
-				{
-					if (key.equals("N"))
-						pos = calcCarPos_N(c);
-					if (key.equals("W"))
-						pos = calcCarPos_W(c);
-					
-					positions.add(pos);
-					// }
-					// TODO: ADD LOGIC TO OTHER DIRECTIONS
-				}
-				addCar(positions);
-			}
-
-
-			// go over each direction, each has a different way to calculate car position
-		}
- */
 	}
 
 	JunctionMap configureFrame(JunctionController jc)
@@ -356,9 +297,17 @@ public class Animator {
 		//go over each road.
 		for (int i = 0; i < 4; i++)
 		{
-			// System.out.print(jc.getRoads()[i]);
 			carQueues[i] = jc.getRoads()[i].getQueueLen();
+			Iterator<Car> counter = jc.getRoads()[i].getWaitingCars().iterator();
+			//Max of 5 cars are added to list. no point ading more bc they wont be printed
+			allCars = new LinkedList<>();
+			while (allCars.size() < 5 && counter.hasNext())
+				allCars.add(counter.next());
+
+
+
 			allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
+			// allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
 			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getRoadCars()));
 			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getPassedCars()));
 
@@ -368,9 +317,10 @@ public class Animator {
 		//actually build map
 		newMap.addTitles(carQueues);
 		
-		// newMap.addCar(carsOnRoad);
-		// newMap.print();
 		newMap.printWithColor();
+		var jc_state = jc.getJunctionState();
+		String msg = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
+		System.out.printf("[%ds]\t%s\n", jc_state.get("elapsedTime"), msg);
 
 		return newMap;
 	}
