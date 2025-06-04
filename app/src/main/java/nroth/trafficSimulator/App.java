@@ -32,17 +32,28 @@ public class App {
 
 		JunctionController jc = new JunctionController(config);
 
-		// try{
-		// 	jc.addCar('N', 3);
-		// 	jc.addCar('E', 2);
-		// 	jc.addCar('S', 8);
-		// 	jc.addCar('W', 13);
+
+		try{
+			jc.addCar('N', 3);
+			jc.addCar('E', 2);
+			jc.addCar('S', 8);
+			jc.addCar('W', 13);
+		}
+		catch (Exception e){System.out.println(e); return;}
+
+		Animator a = new Animator();
+		a.configureFrame(jc);
+		
+		// while (true)
+		// {
+		// 	jc.tick();
+		// 	a.configureFrame(jc);
 		// }
-		// catch (Exception e){System.out.println(e); return;}
+
 
 
 		jc.start(-1);
 
-		JunctionController.log("MAIN: Back in main. exiting ...");
+		// JunctionController.log("MAIN: Back in main. exiting ...");
 	}
 }

@@ -57,6 +57,22 @@ public class Road {
 		}
 		_passedCarsQueue.removeAll(carsToRemove);
 	}
+	public void updateWaitingCars()
+	{
+		Iterator<Car> carIterator = _waitingCarsQueue.iterator();
+		Car currCar;
+
+		int counter = 0;
+		while (carIterator.hasNext())
+		{
+			currCar = carIterator.next();
+			if (currCar.posInJunction == counter)
+				break;
+			currCar.posInJunction = counter;
+			counter --;
+		}
+	}
+
 	public int advanceCarsOnRoad()
 	{
 		int passedCars = 0;
@@ -72,7 +88,7 @@ public class Road {
 
 			if (currCar.posInJunction >= 1)
 			{
-				currCar.posInJunction = 1; // make sure its not some float
+				currCar.posInJunction = 0; // make sure its not some float, 0 so it will be advanced by advancePassedCars 
 				_passedCarsQueue.add(currCar);
 				passedCars ++;
 			}
@@ -90,20 +106,6 @@ public class Road {
 	 */
 	public Map<String, Integer> greenLight_tick(int secInLight)
 	{
-		// int carsOnRoad = 0;
-		// int carsPassed = 0;
-
-		// //go over car in passage, advance by 1/S
-		// //count cars on passage, count cars that passed
-		// //add car to passage if theres time
-
-		// Iterator<Car> carIterator = _waitingCarsQueue.iterator();
-		// Car currCar;
-		// int roadCounter;
-
-// advance cars that already passed the junction
-		advancePassedCars();
-		
 		if (_waitingCarsQueue.peek() != null &&
 			_waitingCarsQueue.peek().crossingTime <= secInLight)
 			{
@@ -111,54 +113,15 @@ public class Road {
 				_carsOnRoad.add(_waitingCarsQueue.poll());
 			}
 		int passedCars = advanceCarsOnRoad();
-		
+		// advance cars that already passed the junction
+		advancePassedCars();
+		updateWaitingCars();
 		//organize and return values
 		Map<String, Integer> ret = new HashMap<>();
 		ret.put("carsOnRoad", _carsOnRoad.size());
 		ret.put("carsPassed", passedCars);
 
 		return ret;
-		
-		
-		// carIterator = _waitingCarsQueue.iterator();
-		// while (carIterator.hasNext())
-		// {
-		// 	currCar = carIterator.next();
-		// 	//if car is on the road OR is in position 0 and has enoughtime left to safely cross
-		// 	if ((currCar.posInJunction > 0 && currCar.posInJunction < 1) || (
-		// 		currCar.posInJunction == 0 && currCar.crossingTime <= secInLight))
-		// 		currCar.posInJunction = currCar.posInJunction + (1.0f / currCar.crossingTime);
-
-		// 	if (currCar.posInJunction >= 1) //if the car passed the junction
-		// 	{
-		// 		carsPassed += 1;
-		// 		JunctionController.printDebug(_roadName + ": car " + currCar.plate + " has passed!");
-		// 		_passedCarsQueue.add(currCar);
-		// 	}
-		// 	else if (currCar.posInJunction > 0) // if car is currently on road
-		// 		carsOnRoad += 1;
-		// 	else if (currCar.posInJunction <= 0) // car is still waiting to cross
-		// 	{
-		// 		roadCounter = 0;
-		// 		do {
-		// 			currCar.posInJunction = roadCounter;
-		// 			roadCounter--;
-		// 		}
-		// 		while (carIterator.hasNext() && (currCar = carIterator.next()) != null);
-		// 	}
-		// }
-
-		// //cleanup cars that passed from the road
-		// // for (int i = 0; i < carsPassed; i++) {_waitingCarsQueue.poll();}
-		// _waitingCarsQueue.removeAll(_passedCarsQueue);
-		
-
-		// //organize and return values
-		// Map<String, Integer> ret = new HashMap<>();
-		// ret.put("carsOnRoad", carsOnRoad);
-		// ret.put("carsPassed", carsPassed);
-
-		// return ret;
 	}
 
 

@@ -2,7 +2,9 @@ package nroth.trafficSimulator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
 * [                    NORTH                 ] 0
@@ -73,6 +75,41 @@ import java.util.List;
 	// 	public int[] getStartPosition (char dir, int carPos)
 public class Animator {
 	private String[] _roadchars = {"N", "E", "S", "W"};
+	public class calcCarPositions {
+		public static int[] calcCarPos_N(Car c)
+		{
+			int[] lanePointZero = {19, 4};
+			float laneSize = 5;
+			int pos = lanePointZero[1];
+
+			//x stays the same, y needs to be changed.
+			if (c.posInJunction <= 0)
+				pos += c.posInJunction;
+			else if (c.posInJunction > 0 && c.posInJunction < 1)
+				pos += 1 + (laneSize * c.posInJunction);
+			else // if pos > 1
+				pos += laneSize + (c.posInJunction);
+
+			return new int[]{lanePointZero[0], pos};
+		}
+		public static int[] calcCarPos_W(Car c)
+		{
+			int[] lanePointZero = {29, 6};
+			float laneSize = 13;
+			int pos = lanePointZero[0];
+
+			//y stays the same, x needs to be changed.
+			if (c.posInJunction <= 0)
+				pos += c.posInJunction;
+			else if (c.posInJunction > 0 && c.posInJunction < 1)
+				pos += 1 + (laneSize * c.posInJunction);
+			else // if pos > 1
+				pos += laneSize + (c.posInJunction);
+
+			return new int[]{pos, lanePointZero[1]};
+		}
+		
+	}
 	private class JunctionMap{
 		private char carChar = 'X';
 		int[][] map_limits = {{11,33}, {2,12}};
@@ -134,10 +171,7 @@ public class Animator {
 				return;
 			addChar(carChar, pos);
 		}
-		public void addCar(List<int[]> positions) {
-			for (int[] pos : positions)
-				this.addCar(pos);
-		}
+
 
 		public void print ()
 		{
@@ -157,39 +191,30 @@ public class Animator {
 		 */
 		// public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
 
-		int[] calcCarPos_N(Car c)
+		public void addAllCars(Function<Car, int[]> func, LinkedList<Car> cars)
 		{
-			int[] lanePointZero = {19, 4};
-			float laneSize = 5;
-			int pos = lanePointZero[1];
-
-			//x stays the same, y needs to be changed.
-			if (c.posInJunction <= 0)
-				pos += c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos += 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos += laneSize + (c.posInJunction);
-
-			return new int[]{lanePointZero[0], pos};
-		}
-		int[] calcCarPos_W(Car c)
-		{
-			int[] lanePointZero = {29, 6};
-			float laneSize = 13;
-			int pos = lanePointZero[0];
-
-			//y stays the same, x needs to be changed.
-			if (c.posInJunction <= 0)
-				pos += c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos += 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos += laneSize + (c.posInJunction);
-
-			return new int[]{pos, lanePointZero[1]};
+			cars.forEach((Car c) -> {
+				addCar(func.apply(c));
+			});
 		}
 
+
+		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
+		{
+			System.out.println ("DIR: " + dirIdx);
+			System.out.println ("CARS: " + allCars);
+			Function<Car, int[]> func = null;
+			switch (dirIdx) {
+				case 0:  func = calcCarPositions::calcCarPos_N;
+				default:
+					break;
+			
+			}
+			if (func != null)
+				addAllCars(func, allCars);
+		}
+
+		/* 
 		public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
 		{
 			JunctionController.printDebug(carsOnRoad.toString());
@@ -219,44 +244,34 @@ public class Animator {
 
 			// go over each direction, each has a different way to calculate car position
 		}
-
+ */
 	}
 
 	JunctionMap configureFrame(JunctionController jc)
 	{
-		JunctionMap newMap;
+		JunctionMap newMap = new JunctionMap();
 		//figure out what cars are on the road, and which are waiting in queue
 		int[] carQueues = {0,0,0,0};
-		HashMap <String, List<Car>> carsOnRoad = new HashMap<>();
+		LinkedList<Car> allCars;
 
 
 		//go over each road.
-		//extract cars either to carsOnRoad or add waiting cars to carrQueue
 		for (int i = 0; i < 4; i++)
 		{
-			// carQueues[i] =( (Map<String, Integer>) jc.getJunctionState().get("roadQueues")).get(roadchars[i]);
-			List<Car> cars = new ArrayList<>();
-			for (Car c : jc.getRoads()[i].getRoadCars())
-			{
-				if (c.posInJunction <= 0)
-					carQueues[i] ++;
-				cars.add(c);
-			}
+			carQueues[i] = jc.getRoads()[i].getQueueLen();
+			allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
+			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getRoadCars()));
+			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getPassedCars()));
 
-			//getQueueLen includes cars on road, we want only the cars that are waiting.
-			// carQueues[i] -= cars.size();
-			carsOnRoad.put(_roadchars[i], cars);
-			// System.out.print("CARS: " + cars);
+			newMap.addCarsToDirection (i, allCars);
 		}
 
 		//actually build map
-		newMap = new JunctionMap();
 		newMap.addTitles(carQueues);
 		
 		// newMap.addCar(carsOnRoad);
-		newMap.addAllCars(carsOnRoad);
 		newMap.print();
-		System.out.println (carsOnRoad.get("N"));
+
 		return newMap;
 	}
 
