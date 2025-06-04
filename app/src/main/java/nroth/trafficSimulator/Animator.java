@@ -94,7 +94,7 @@ public class Animator {
 		}
 		public static int[] calcCarPos_W(Car c)
 		{
-			int[] lanePointZero = {29, 6};
+			int[] lanePointZero = {15, 6};
 			float laneSize = 13;
 			int pos = lanePointZero[0];
 
@@ -113,6 +113,7 @@ public class Animator {
 	private class JunctionMap{
 		private char carChar = 'X';
 		int[][] map_limits = {{11,33}, {2,12}};
+
 		String[] mapStringArr =
 			{
 				"                    NORTH                  ",
@@ -142,6 +143,8 @@ public class Animator {
 				{7, 7} //W
 			};
 
+			
+
 			char[] chararr;
 			for (int i = 0; i < carQueues.length ; i++)
 			{
@@ -165,12 +168,14 @@ public class Animator {
 			row[pos[0]] = c;
 			this.mapStringArr[pos[1]] = new String(row);
 		}
+
 		public void addCar(int[] pos) {
 			if (pos[0] < map_limits[0][0] || pos[0] > map_limits[0][1]
 			|| pos[1] < map_limits[1][0] || pos[1] > map_limits[1][1] )
 				return;
 			addChar(carChar, pos);
 		}
+
 
 
 		public void print ()
@@ -191,27 +196,33 @@ public class Animator {
 		 */
 		// public void addAllCars(HashMap <String, List<Car>> carsOnRoad)
 
-		public void addAllCars(Function<Car, int[]> func, LinkedList<Car> cars)
+		public void addAllCars(Function<Car, int[]> func,  LinkedList<Car> cars)
 		{
 			cars.forEach((Car c) -> {
-				addCar(func.apply(c));
+
+				int[] pos;
+				pos = func.apply(c);
+					addCar(pos);
+
 			});
 		}
 
-
 		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
 		{
-			System.out.println ("DIR: " + dirIdx);
-			System.out.println ("CARS: " + allCars);
+			// System.out.println ("DIR: " + dirIdx);
+			// System.out.println ("CARS: " + allCars);
 			Function<Car, int[]> func = null;
 			switch (dirIdx) {
-				case 0:  func = calcCarPositions::calcCarPos_N;
+				case 0:  func = calcCarPositions::calcCarPos_N; break;
+				case 3:  func = calcCarPositions::calcCarPos_W; break;
 				default:
 					break;
 			
 			}
+			if (dirIdx == 3)
+				System.out.println("WEST");
 			if (func != null)
-				addAllCars(func, allCars);
+				addAllCars(func,  allCars);
 		}
 
 		/* 
@@ -258,6 +269,7 @@ public class Animator {
 		//go over each road.
 		for (int i = 0; i < 4; i++)
 		{
+			// System.out.print(jc.getRoads()[i]);
 			carQueues[i] = jc.getRoads()[i].getQueueLen();
 			allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
 			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getRoadCars()));

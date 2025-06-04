@@ -52,7 +52,16 @@
 
 ##
 	TODO:
-	[ ] - cars passing the junction should also be printed. the structure of Road needs to keep and advance passing cars.
+	[x] - cars passing the junction should also be printed. the structure of Road needs to keep and advance passing cars.
+	[ ] - Car directions:
+		[x] - North
+		[ ] - South
+		[ ] - East
+		[x] - West
+	[ ] - current phase title
+	[ ] - timer title
+	[ ] - total passed cars? per road counter?
+	[ ] - Colors??
 	
 
 
