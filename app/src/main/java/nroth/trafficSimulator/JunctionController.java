@@ -2,8 +2,6 @@ package nroth.trafficSimulator;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,9 +20,9 @@ import nroth.trafficSimulator.ConfigReader.Config;
 	- car arrivals
 	- logging
  **/
- 
+
 public class JunctionController {
-	
+
 	public enum PhaseValue { //pre-set values for each phase
 		NS_GREEN, EW_GREEN
 	}
@@ -36,9 +34,6 @@ public class JunctionController {
 	private static final Logger _logger = LoggerFactory.getLogger(App.class); // Logger - static so can be used without initialization
 	private int _totalCarsPassed;				// counter for total cars that safely pass through the junction
 	private static int _elapsedTime = 0;		// elapsed time since beginning of simulation
-	
-		
-
 
 	public Road[] getRoads() {return _roads;}
 	public Config getConfig() {return _config;}
@@ -134,25 +129,30 @@ public class JunctionController {
 	 * @return
 	 */
 	public String summary() {
-		String out = "";
-
 		JunctionState js = getJunctionState();
-		@SuppressWarnings("unchecked") //is safe! this mapis only created once. is always <String, Integer>
 		Map<String, Integer> queues = js.roadQueues();
 
-		out += ("\n---- JUNCTION SUMMARY ----\n");
-		out += String.format("Elapsed time: %d\n", js.elapsedTime);
-		out += String.format("Cars on road: %d\n", js.carsOnRoad);
-		out += ("Current Queues:\n");
-		out += String.format("  North: %d\n", queues.get("North"));
-		out += String.format("  East:  %d\n", queues.get("East"));
-		out += String.format("  South: %d\n", queues.get("South"));
-		out += String.format("  West:  %d\n", queues.get("West"));
-		out += String.format("Total cars in junction: %d\n", queues.get("Total"));
-		out += String.format("Total cars passed in junction: %d\n", js.totalCarsPassed);
-		out += ("--------------------------");
-
-		return out;
+		return String.format(
+			"\n---- JUNCTION SUMMARY ----\n" +
+			"Elapsed time: %d\n" +
+			"Cars on road: %d\n" +
+			"Current Queues:\n" +
+			"  North: %d\n" +
+			"  East:  %d\n" +
+			"  South: %d\n" +
+			"  West:  %d\n" +
+			"Total cars in junction: %d\n" +
+			"Total cars passed in junction: %d\n" +
+			"--------------------------",
+			js.elapsedTime,
+			js.carsOnRoad,
+			queues.get("North"),
+			queues.get("East"),
+			queues.get("South"),
+			queues.get("West"),
+			queues.get("Total"),
+			js.totalCarsPassed
+		);
 	}
 
 	/**
@@ -172,16 +172,16 @@ public class JunctionController {
 	 * logs and prints a formatted version of msg with time
 	 * appends 'style' string to beginning of msg, and resets style at the end.
 	 * Message does not have syyling in Logfile.
-	 * Is static to allow printing using the correct time value without instantiating JunctionController 
+	 * Is static to allow printing using the correct time value without instantiating JunctionController
 	 * @param msg
 	 * @param style
 	 */
 	public static void log (String msg, String style)
 	{
 		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
-		
+
 		_logger.info(fullMessage);
-		System.out.println(style + fullMessage + "\033[0m");
+		System.out.printf("%s%s\033[0m\n", style , fullMessage);
 	}
 
 	/**
@@ -201,8 +201,9 @@ public class JunctionController {
 	{
 
 		int secondRoadOffset;
-		String phaseSwitchMsg = "--------Phase switch!-----------------\n";
-		phaseSwitchMsg += ("\tlast phase overview: \n\t\t" + _currentPhase + "\n");
+		String phaseSwitchMsg = "--------Phase switch!-----------------\n"
+			+ "\tlast phase overview: \n\t\t%s\n".formatted(_currentPhase);
+
 		this._totalCarsPassed += _currentPhase.carsPassed;
 
 		secondRoadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 1 : 0);
@@ -211,18 +212,18 @@ public class JunctionController {
 			_currentPhase.switchPhase();
 		else
 		{
-			phaseSwitchMsg += ("[!] Phase not switched! no cars on other road.\n");
+			phaseSwitchMsg = phaseSwitchMsg.concat("[!] Phase not switched! no cars on other road.\n");
 			_currentPhase.resetPhase();
 		}
 
-		phaseSwitchMsg += ("\tNew phase: " + _currentPhase.phase.name()+ "\n");
+		phaseSwitchMsg += "\tNew phase: %s\n".formatted(_currentPhase.phase.name());
 
-		phaseSwitchMsg += (String.format("\tCar Queues:\tN [%d] ; E [%d] ; S [%d] ; W :[%d]\n",
+		phaseSwitchMsg += "\tCar Queues:\tN [%d] ; E [%d] ; S [%d] ; W :[%d]\n".formatted(
 				_roads[0].getQueueLen(),
 				_roads[1].getQueueLen(),
 				_roads[2].getQueueLen(),
-				_roads[3].getQueueLen()));
-		
+				_roads[3].getQueueLen());
+
 		JunctionController.log(phaseSwitchMsg, "\033[1m"); // add bold style
 
 	}
@@ -285,7 +286,7 @@ public class JunctionController {
 			try {
 				animator[0].printFrame(this);
 			} catch (IOException e) {
-				JunctionController.log("ERR from Animator.configureFrame: "); 
+				JunctionController.log("ERR from Animator.configureFrame: ");
 				e.printStackTrace();
 				System.exit(-1);
 			}
@@ -317,7 +318,7 @@ public class JunctionController {
 						try {
 							animator[0].printFrame(this);
 						} catch (IOException e) {
-							JunctionController.log("ERR from Animator.configureFrame: "); 
+							JunctionController.log("ERR from Animator.configureFrame: ");
 							e.printStackTrace();
 							System.exit(-1);
 						}

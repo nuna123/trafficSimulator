@@ -28,7 +28,7 @@
 
 	// how many units are across the junction
 	// from carPosition 0, it sould take DIS to cross the road
-	
+
 	laneSize_X = 13  // horizontal size, cars coming from W / E
 	laneSize_Y = 5  // vertical size, cars coming from N / S
 
@@ -62,11 +62,11 @@
 		[x]- South
 		[x] - East
 		[x] - West
-	[ ] - current phase title
-	[ ] - timer title
-	[ ] - total passed cars? per road counter?
+	[x] - current phase title
+	[x] - timer title
 	[x] - Colors??
-	
+	[ ] - total passed cars? per road counter?
+
 
 
 

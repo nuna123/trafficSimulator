@@ -11,7 +11,6 @@ import java.util.*;
 public class ConfigReader {
 
 	private String _filePath = null;
-	private Map<String, Integer> _mappedConfig = null;
 	private static List<String> _requiredKeys = Arrays.asList(
 			"X1",
 			"X2",
@@ -24,7 +23,7 @@ public class ConfigReader {
 	public record Config (Integer X1, Integer X2, Integer S, Integer A1, Integer A2, Integer A3, Integer A4){};
 
 	public String getFilePath (){return _filePath;}
-	public Map<String, Integer> getMappedConfig (){return (_mappedConfig == null ? null : Collections.unmodifiableMap(_mappedConfig));}
+
 	public List<String> getRequiredKeys (){ return Collections.unmodifiableList(_requiredKeys);}
 
 	/**
@@ -38,7 +37,7 @@ public class ConfigReader {
 		InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream(path);
 		// InputStream inputStream = getClass().getResource(path).openStream();
 		if (inputStream == null) {
-			throw new FileNotFoundException(path + ": Config file not found!");
+			throw new FileNotFoundException("%s: Config file not found!".formatted(path));
 		}
 		_filePath = path;
 		inputStream.close();
@@ -47,7 +46,7 @@ public class ConfigReader {
 	/**
 	 * fills the config record from Properties file.
 	 * By this point we know properties file has all fields and they are integers
-	 * @param properties 
+	 * @param properties
 	 * @return Config variable
 	 */
 	public Config fillConfig(Properties properties)
@@ -61,7 +60,7 @@ public class ConfigReader {
 			Integer.parseInt (properties.getProperty("A3")),
 			Integer.parseInt (properties.getProperty("A4"))
 			);
-		
+
 		return c;
 	}
 
@@ -78,12 +77,12 @@ public class ConfigReader {
 		// check that all needed values exist, all are integers
 		for (String key : _requiredKeys) {
 			if (!properties.containsKey(key))
-				throw new MissingKeyException("Missing Key " + key + " in properties file!");
+				throw new MissingKeyException("Missing Key %s in properties file!".formatted(key));
 			try{
 				Integer.valueOf(properties.getProperty(key));
 			}
 			catch(NumberFormatException e){
-				throw new NumberFormatException(properties.getProperty(key) + " could not be converted to integer!\n");
+				throw new NumberFormatException( "%s could not be converted to integer!\n".formatted(properties.getProperty(key)));
 			}
 		}
 		Config c = fillConfig(properties);
@@ -95,9 +94,9 @@ public class ConfigReader {
 			value = Integer.parseInt((String) properties.get(key));
 
 			if (!key.startsWith("A") && value < 1)
-				throw new InvalidValueException("Value of " + key + " cannot less than 1!");
+				throw new InvalidValueException("Value of %s cannot less than 1!".formatted(key));
 			else if (key.startsWith("A") && value != -1 && value < 1)
-				throw new InvalidValueException("Value of " + key + " can be a positive integer, or -1.");
+				throw new InvalidValueException("Value of %s can be a positive integer, or -1.".formatted(key));
 		}
 
 		// S cannot be larger than X1/X2, how would a car cross the road?
@@ -126,7 +125,7 @@ public class ConfigReader {
 		prop.load(propsInput);
 
 		Config config = validateValues(prop);
-	
+
 		propsInput.close();
 
 		return config;

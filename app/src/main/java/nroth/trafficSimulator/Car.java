@@ -17,7 +17,7 @@ import java.util.Random;
 public class Car {
 	private static final int MIN_ID = 1111;
 	private static final int MAX_ID = 9999;
-	private final static Random _random = new Random();
+	private final static Random RANDOM = new Random();
 
 	public final int length;
 	public final int crossingTime;
@@ -41,7 +41,7 @@ public class Car {
 	 */
 	private String generatePlate()
 	{
-		int r = _random.nextInt(MAX_ID - MIN_ID + 1) + MIN_ID;
+		int r = RANDOM.nextInt(MAX_ID - MIN_ID + 1) + MIN_ID;
 
 		return ("1AA" + String.valueOf(r));
 	}
