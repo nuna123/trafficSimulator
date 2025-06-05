@@ -1,5 +1,6 @@
 package nroth.trafficSimulator;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -257,7 +258,13 @@ public class JunctionController {
 			System.exit(-1);
 		}
 		if (animator[0] != null)
-			animator[0].configureFrame(this);
+			try {
+				animator[0].configureFrame(this);
+			} catch (IOException e) {
+				JunctionController.log("ERR from Animator.configureFrame: "); 
+				e.printStackTrace();
+				System.exit(-1);
+			}
 
 		// Add shutdown hook to catch Ctrl+C
 		// Note: Gradle runtime environment interferes with this, output will be shown in logs but not console
@@ -283,7 +290,13 @@ public class JunctionController {
 				if (timeLimit_sec == -1 || JunctionController._elapsedTime < timeLimit_sec)
 					{
 						this.tick();
-						animator[0].configureFrame(this);
+						try {
+							animator[0].configureFrame(this);
+						} catch (IOException e) {
+							JunctionController.log("ERR from Animator.configureFrame: "); 
+							e.printStackTrace();
+							System.exit(-1);
+						}
 					}
 				else{
 					scheduler.shutdown();

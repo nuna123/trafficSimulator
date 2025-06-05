@@ -12,49 +12,6 @@ import com.googlecode.lanterna.TextColor.ANSI;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
-/**
-* [                    NORTH                 ] 0
-* [                |    ( )    |             ] 1
-* [                |           |             ] 2
-* [                |     |     |             ] 3
-* [                |           |             ] 4
-* [       ---------|- - -|- - -|---------    ] 5
-* [                                          ] 6
-* [   WEST( ) - - -|- - -|- - -|- - - ( )EAST] 7
-* [                                          ] 8
-* [       ---------|- - -|- - -|---------    ] 9
-* [                |           |             ] 10
-* [                |     |     |             ] 11
-* [                |           |             ] 12
-* [                |    ( )    |             ] 13
-* [                    SOUTH                 ] 14
-
-	north_lane = junction[19, CARPOS]
-	south_lane = junction[25, CARPOS]
-	east_lane = junction[CARPOS, 6]
-	west_lane = junction[CARPOS, 8]
-
-	// how many units are across the junction
-	// [E->W, N->S]
-	// from point 0, it sould take DIS + 1 to cross the road
-	laneSize_X = 13  // horizontal size, cars coming from W / E
-	laneSize_Y = 5  // vertical size, cars coming from N / S
-
-	// start position of the car BEFORE it is in the junction
-	lanePoint0_N = [19, 4]
-	lanePoint0_S = [25, 10]
-
-	lanePoint0_E = [29,6]
-	lanePoint0_W = [15, 8]
-
-
-	//Car Queues positions
-	//positions of the queue count title
-	N = [22,1]
-	S = [22,13]
-	E = [36,7]
-	W = [9,7]
-*/
 
 public class Animator {
 
@@ -63,76 +20,26 @@ public class Animator {
 
 
 	//holder for the car position calculation functions
-	public class calcCarPositions {
-		public static int[] calcCarPos_N(Car c)
-		{
-			int[] lanePointZero = {19, 4};
-			float laneSize = 5;
-			int pos = lanePointZero[1];
 
-			//x stays the same, y needs to be changed.
-			if (c.posInJunction <= 0)
-				pos += c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos += 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos += laneSize + (c.posInJunction);
+	// 0 = North → Y increases
+	// 1 = East → X decreases
+	// 2 = South → Y decreases
+	// 3 = West → X increases
 
-			return new int[]{lanePointZero[0], pos};
-		}
-		public static int[] calcCarPos_S(Car c)
-		{
-			int[] lanePointZero = {25, 10};
-			float laneSize = 5;
-			int pos = lanePointZero[1];
 
-			//x stays the same, y needs to be changed.
-			if (c.posInJunction <= 0)
-				pos -= c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos -= 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos -= laneSize + (c.posInJunction);
-
-			return new int[]{lanePointZero[0], pos};
-		}
-		public static int[] calcCarPos_W(Car c)
-		{
-			int[] lanePointZero = {15, 8};
-			float laneSize = 13;
-			int pos = lanePointZero[0];
-
-			//y stays the same, x needs to be changed.
-			if (c.posInJunction <= 0)
-				pos += c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos += 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos += laneSize + (c.posInJunction);
-
-			return new int[]{pos, lanePointZero[1]};
-		}
-		public static int[] calcCarPos_E(Car c)
-		{
-			int[] lanePointZero = {29, 6};
-			float laneSize = 13;
-			int pos = lanePointZero[0];
-
-			//y stays the same, x needs to be changed.
-			if (c.posInJunction <= 0)
-				pos -= c.posInJunction;
-			else if (c.posInJunction > 0 && c.posInJunction < 1)
-				pos -= 1 + (laneSize * c.posInJunction);
-			else // if pos > 1
-				pos -= laneSize + (c.posInJunction);
-
-			return new int[]{pos, lanePointZero[1]};
-		}
-	}
 
 	//constants needed for displaying
 	public class constants
 	{
+		final static int[][] lanePointZero = {
+				{19, 4},	// North
+				{29, 6},	// East
+				{25, 10},	// South
+				{15, 8}		// West
+		};
+		final static int laneSize_Y = 5; // for cars coming from N or S
+		final static int laneSize_X = 13; // for cars coming from E or W
+
 		final static char carChar = 'X';
 		final static int[][] map_limits = {{11,33}, {2,12}};
 		final static int[][] titlePos = {
@@ -151,11 +58,12 @@ public class Animator {
 
 
 		final static String strResetColor = "\u001B[0m";
+		// ANSI color codes for directions:
 		final static String[] strColorArr = {
-				"\u001B[31m", // North 
-				"\u001B[32m", //East
-				"\u001B[33m", //South
-				"\u001B[34m" //West
+				"\u001B[31m", // North - Red
+				"\u001B[32m", // East  - Green
+				"\u001B[33m", // South - Yellow
+				"\u001B[34m"  // West  - Blue
 			};
 
 
@@ -244,33 +152,46 @@ public class Animator {
 
 			colorMap[pos[1]] = new String(row_c);
 		}
-
-		public void addAllCars(Function<Car, int[]> func, int dirIdx, LinkedList<Car> cars)
+		public static int[] CarPositionCalculator(Car car, int directionIndex)
 		{
-			cars.forEach((Car c) -> {
-				int[] pos;
-				pos = func.apply(c);
-				addCar(pos);
-				addToColorMap(pos, dirIdx);
+			int[] startPoint = constants.lanePointZero[directionIndex].clone();
 
-			});
+			boolean isVertical = (directionIndex % 2 == 0); // true for N/S, false for E/W
+			int directionSign = (directionIndex % 3 == 0 ? 1 : -1); // 1 for N/W, -1 for S/E
+
+			float laneLength = isVertical ? constants.laneSize_Y : constants.laneSize_X;
+			int positionOffset = 0;
+
+			if (car.posInJunction <= 0)
+				positionOffset += car.posInJunction;
+			else if (car.posInJunction > 0 && car.posInJunction < 1)
+				positionOffset += 1 + (laneLength * car.posInJunction);
+			else // if pos > 1
+				positionOffset += laneLength + (car.posInJunction);
+
+			// For S or E, position decreases as car advances
+			positionOffset *= directionSign;
+
+			// For N/S, Y changes; for E/W, X changes
+			if (isVertical) 
+				startPoint[1] = startPoint[1] + positionOffset;
+			else 
+				startPoint[0] = startPoint[0] + positionOffset;
+			
+			return startPoint;
 		}
 
 		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
 		{
-			Function<Car, int[]> func = null;
+			allCars.forEach((Car c) -> {
+				int[] pos;
+				pos = CarPositionCalculator(c, dirIdx);
+				addCar(pos);
+				addToColorMap(pos, dirIdx);
 
-			switch (dirIdx) {
-				case 0:  func = calcCarPositions::calcCarPos_N; break;
-				case 1:  func = calcCarPositions::calcCarPos_E; break;
-				case 2:  func = calcCarPositions::calcCarPos_S; break;
-				case 3:  func = calcCarPositions::calcCarPos_W; break;
-				default:
-					break;
+			});
+
 			
-			}
-			if (func != null)
-				addAllCars(func, dirIdx, allCars);
 		}
 
 		public void printWithColor ()
@@ -331,9 +252,8 @@ public class Animator {
 
 	public void printOnTerminal (JunctionMap jm, String messageString)
 				throws IOException
-	{
-		// https://github.com/mabe02/lanterna/blob/master/docs/tutorial/Tutorial02.md
-		
+	{		
+
 		_terminal.clearScreen();
 
 		char[] colorRow;
@@ -376,6 +296,7 @@ public class Animator {
 
 
 	JunctionMap configureFrame(JunctionController jc)
+	throws IOException
 	{
 		JunctionMap newMap = new JunctionMap();
 		//figure out what cars are on the road, and which are waiting in queue
@@ -384,7 +305,7 @@ public class Animator {
 
 		var jc_state = jc.getJunctionState();
 		String stateString = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
-		String message =String.format("[%ds]\t%s\n", jc_state.get("elapsedTime"), stateString);
+		String message =String.format("[%ds]\t%s\n\n", jc_state.get("elapsedTime"), stateString);
 
 
 		//go over each road.
@@ -396,30 +317,17 @@ public class Animator {
 			allCars = new LinkedList<>();
 			while (allCars.size() < 5 && counter.hasNext())
 				allCars.add(counter.next());
-
-
-
-			allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
-			// allCars = (LinkedList<Car>) (jc.getRoads()[i].getWaitingCars());
 			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getRoadCars()));
 			allCars.addAll((LinkedList<Car>) (jc.getRoads()[i].getPassedCars()));
 
 			newMap.addCarsToDirection (i, allCars);
 		}
 
-		//actually build map
 		newMap.addTitles(carQueues);
-		
-		// newMap.printWithColor(); // printer for user console
-		// System.out.print(message);
 
-		try{
-			printOnTerminal(newMap, message);
-		} catch (IOException e)
-		{
-			System.out.println(e);
-			System.exit(1);
-		}
+		//may throw IOEXCEPTION
+		printOnTerminal(newMap, message);
+		
 		return newMap;
 	}
 

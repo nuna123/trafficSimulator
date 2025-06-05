@@ -41,19 +41,8 @@ public class App {
 		}
 		catch (Exception e){System.out.println(e); return;}
 
-		// Animator a = new Animator();
-		// a.configureFrame(jc);
-		
-		// while (true)
-		// {
-		// 	jc.tick();
-		// 	a.configureFrame(jc);
-		// }
-
-
 
 		jc.start(-1);
-
-		// JunctionController.log("MAIN: Back in main. exiting ...");
+		JunctionController.log("MAIN: Back in main. exiting ...");
 	}
 }

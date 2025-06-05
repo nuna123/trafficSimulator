@@ -27,6 +27,7 @@ dependencies {
 
     // Google Lanterna for displaying in a separate terminal
     implementation 'com.googlecode.lanterna:lanterna:3.1.3'
+
     // Google Core Libraries for Java [https://github.com/google/guava]
     implementation libs.guava
 }
