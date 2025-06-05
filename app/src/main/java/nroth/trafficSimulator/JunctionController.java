@@ -1,5 +1,6 @@
 package nroth.trafficSimulator;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -215,6 +216,9 @@ public class JunctionController {
 		int roadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 0 : 1);
 		res1 = _roads[0 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
 		res2 = _roads[2 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+		roadOffset = (roadOffset == 1 ? 0 : 1);
+		_roads[0 + roadOffset].advancePassedCars();
+		_roads[2 + roadOffset].advancePassedCars();
 
 		JunctionController.printDebug(String.format("road states: {\n\t[%s], \n\t[%s]}", _roads[0 + roadOffset].toString(),_roads[2 + roadOffset].toString()));
 
@@ -247,6 +251,20 @@ public class JunctionController {
 		}
 
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+		Animator[] animator = new Animator[1];
+		try {
+			animator[0] = new Animator();
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+		if (animator[0] != null)
+			try {
+				animator[0].configureFrame(this);
+			} catch (IOException e) {
+				JunctionController.log("ERR from Animator.configureFrame: "); 
+				e.printStackTrace();
+				System.exit(-1);
+			}
 
 		// Add shutdown hook to catch Ctrl+C
 		// Note: Gradle runtime environment interferes with this, output will be shown in logs but not console
@@ -254,7 +272,8 @@ public class JunctionController {
 			if (JunctionController._elapsedTime < timeLimit_sec)
 			{
 				JunctionController.log("[!] Non-peaceful termination: Ctrl+C");
-				scheduler.shutdownNow();  // Optional: force shutdown
+				animator[0].shutdown();
+				scheduler.shutdownNow();
 			}
 			JunctionController.log(this.summary());
 		}));
@@ -269,9 +288,19 @@ public class JunctionController {
 		Runnable task = () -> {
 			synchronized (this.threadLock) {
 				if (timeLimit_sec == -1 || JunctionController._elapsedTime < timeLimit_sec)
-					this.tick();
+					{
+						this.tick();
+						try {
+							animator[0].configureFrame(this);
+						} catch (IOException e) {
+							JunctionController.log("ERR from Animator.configureFrame: "); 
+							e.printStackTrace();
+							System.exit(-1);
+						}
+					}
 				else{
 					scheduler.shutdown();
+					animator[0].shutdown();
 					JunctionController.log("[!] Time limit reached! Shutting down scheduler.");
 				}
 			}

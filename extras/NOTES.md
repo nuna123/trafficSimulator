@@ -2,7 +2,8 @@
 Traffic Intersection Simulator - Green:Code Internship Assignment
 
 
-## TODO
+
+# TODO
 - [x] Make car move across the road in real time!
 - [x] Define Vehicle class NOTE: done as record in Road class
 	- [ ] OPTIONAL:  trucks? to be *2 size, (S), of regular cars
@@ -32,7 +33,7 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 
 
 
-## CONFIG VARIABLES:
+# CONFIG VARIABLES:
 - X1		Phase A length in sec
 - X2		Phase B length in sec
 - S			How long for a car to cross the road, in sec
@@ -42,7 +43,7 @@ Traffic Intersection Simulator - Green:Code Internship Assignment
 ALL VALUES ARE KEPT IN CONFIG.PROPERTIES
 
 
-## CLASSES:
+# CLASSES:
 	ConfigReader
 		reads the config file, makes sure all values are valid and present.
 		reads into a Map <String, Float>
@@ -111,3 +112,4 @@ A build automation tool that simplifies the process of building and deploying so
     The source code and build configuration for my app.
 ###     app/build.gradle.kts
 	configuration file to define which dependencies and plugins the app subproject is using
+

@@ -28,7 +28,7 @@ class RoadTest {
 		roadLen = controller.getQueueLen();
 
 		assertEquals(1, roadLen); //only 1 car in queue
-		assertEquals(controller.getQueue().peek(), addedCar); //car added is the new car
+		assertEquals(controller.getWaitingCars().peek(), addedCar); //car added is the new car
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class RoadTest {
 		Car addedCar = controller.addCar();
 		for (int i = 0;i ++ < 5;){controller.addCar();}
 
-		assertEquals(addedCar, controller.getQueue().peek()); //first car in queue is the car that was added first
+		assertEquals(addedCar, controller.getWaitingCars().peek()); //first car in queue is the car that was added first
 	}
 
 	@Test
@@ -63,33 +63,42 @@ class RoadTest {
 		int timer = 5;
 		for (int i = 0;i < car_queue_len; i++){controller.addCar();} //5 cars on the road
 
-
-		controller.greenLight_tick(timer--);
-		//car should not have passed
+		System.out.println(controller.getWaitingCars());
+		System.out.println(controller.getRoadCars());
 		assertEquals(car_queue_len, controller.getQueueLen());
-
+		
+		controller.greenLight_tick(timer--);
+		System.out.println(controller.getRoadCars());
+		//car should not have passed, but should be on road
+		assertEquals(car_queue_len - 1, controller.getQueueLen());
+		assertEquals(1, controller.getRoadCars().size());
+		
 		//in 4 more ticks, 3 cars should fully pass
-		while (timer > 0){controller.greenLight_tick(timer);  System.out.println("\ntimer: " + timer--);}
+		while (timer > 0){
+			controller.greenLight_tick(timer);
+			System.out.println(controller.getRoadCars());
+			timer--;
+		}
 
 		assertEquals(car_queue_len - 3, controller.getQueueLen());
+		assertEquals(0, controller.getRoadCars().size());
 
 /* x = car; [---] = junction
 	TS
-	0	-xx[---]
-
-	1	--x[x--]
-	2	---[xx-]
-	3	---[-xx]
-	4	---[--x]x
-	5	---[---]xx
+	0	xxx[---]	{T = 5}
+	1	-xx[x--]	{T = 4}=> assertEquals(car_queue_len - 1, controller.getQueueLen())
+	2	--x[xx-]	{T = 3}
+	3	--x[-xx]	{T = 2}
+	4	--x[--x]x	{T = 1}
+	5	--x[---]xx	{T = 0}
  */
 	}
 
 	@Test
 	public void testGetQueueReturnsCopy() {
 		controller.addCar();
-		Queue<Car> queue1 = controller.getQueue();
-		Queue<Car> queue2 = controller.getQueue();
+		Queue<Car> queue1 = controller.getWaitingCars();
+		Queue<Car> queue2 = controller.getWaitingCars();
 		assertEquals(queue1, queue2);
 		queue1.poll();
 		// Original queue should not be affected
@@ -103,5 +112,16 @@ class RoadTest {
 		// After one tick, one car should have passed (S=1)
 		assertEquals(0, (int) result.get("carsOnRoad"));
 		assertEquals(1, (int) result.get("carsPassed"));
+	}
+
+	@Test
+	public void testGreenLightTickUpdatesQueue() {
+		controller.addCar();
+		controller.greenLight_tick(1);
+
+		// After one tick, one car should have passed (S=1)
+		assertEquals(0, (int) controller.getWaitingCars().size());
+		assertEquals(0, (int) controller.getRoadCars().size());
+		assertEquals(1, (int) controller.getPassedCars().size());
 	}
 }

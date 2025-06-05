@@ -20,8 +20,7 @@ public class App {
 		return cr.getMappedConfig();
 	}
 
-
-	public static void main(String[] args) {
+ public static void main(String[] args) {
 
 
 		Map <String, Integer> config = getConfig();
@@ -43,7 +42,6 @@ public class App {
 
 
 		jc.start(-1);
-
 		JunctionController.log("MAIN: Back in main. exiting ...");
 	}
 }
