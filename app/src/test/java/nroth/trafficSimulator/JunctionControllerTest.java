@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nroth.trafficSimulator.JunctionController.JunctionState;
+
 
 class JunctionControllerTest {
 
@@ -222,9 +224,9 @@ class JunctionControllerTest {
 		controller.start(timeLimit);
 
 		// After simulation, elapsed time should be at least the time limit, but not much more
-		Map<String, Object> state = controller.getJunctionState();
+		var state = controller.getJunctionState();
 
-		int elapsed = (int) state.get("elapsedTime");
+		int elapsed = state.elapsedTime();
 		assertEquals(timeLimit, elapsed);
 		// assertTrue(elapsed == timeLimit, "Simulation should run for the specified time limit");
 	}

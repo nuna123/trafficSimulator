@@ -7,7 +7,6 @@ import java.util.Iterator;
 
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.TextColor.ANSI;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
@@ -375,8 +374,8 @@ public class Animator {
 		LinkedList<Car> allCars;
 
 		var jc_state = jc.getJunctionState();
-		String stateString = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
-		String message =String.format("[%ds]\t%s\n\n", jc_state.get("elapsedTime"), stateString);
+		String stateString = (jc_state.currentPhase().equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
+		String message =String.format("[%ds]\t%s\n\n", jc_state.elapsedTime(), stateString);
 
 
 		//go over each road.

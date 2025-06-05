@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 	- car arrivals
 	- logging
  **/
+ 
 public class JunctionController {
 	
 	public enum PhaseValue { //pre-set values for each phase
@@ -32,6 +33,8 @@ public class JunctionController {
 	private static final Logger _logger = LoggerFactory.getLogger(App.class); // Logger - static so can be used without initialization
 	private int _totalCarsPassed;				// counter for total cars that safely pass through the junction
 	private static int _elapsedTime = 0;		// elapsed time since beginning of simulation
+	
+		
 
 
 	public Road[] getRoads() {return _roads;}
@@ -94,27 +97,31 @@ public class JunctionController {
 	 *
 	 * @return A map containing phase, elapsed time, cars on road, total cars passed, and road queue sizes.
 	 */
-	public Map<String, Object> getJunctionState() {
-		Map<String, Object> junctionState = new HashMap<>();
+	public record JunctionState (
+		String currentPhase,
+		Integer elapsedTime,
+		Integer carsOnRoad,
+		Integer totalCarsPassed,
+		Map<String, Integer> roadQueues){};
 
-		junctionState.put("currentPhase", _currentPhase.phase.name());
-		junctionState.put("elapsedTime", _elapsedTime);
-		junctionState.put("carsOnRoad", _currentPhase.carsOnRoad);
-		junctionState.put("totalCarsPassed", _totalCarsPassed);
 
-		junctionState.put("roadQueues", Map.of(
+	public JunctionState getJunctionState() {
+
+		JunctionState junctionState = new JunctionState(
+			_currentPhase.phase.name(),
+			_elapsedTime,
+			_currentPhase.carsOnRoad,
+			_totalCarsPassed,
+			Map.of(
 				"North", _roads[0].getQueueLen(),
 				"East", _roads[1].getQueueLen(),
 				"South", _roads[2].getQueueLen(),
 				"West", _roads[3].getQueueLen(),
 				"Total", Arrays.stream(_roads)
 						.mapToInt(road -> road.getQueueLen())
-						.sum()
-
-		));
-
+						.sum())
+		);
 		return junctionState;
-
 	}
 
 	/**
@@ -124,20 +131,20 @@ public class JunctionController {
 	public String summary() {
 		String out = "";
 
-		Map<String, Object> js = getJunctionState();
+		JunctionState js = getJunctionState();
 		@SuppressWarnings("unchecked") //is safe! this mapis only created once. is always <String, Integer>
-		Map<String, Integer> queues = (Map<String, Integer>) js.get("roadQueues");
+		Map<String, Integer> queues = js.roadQueues();
 
 		out += ("\n---- JUNCTION SUMMARY ----\n");
-		out += String.format("Elapsed time: %d\n", js.get("elapsedTime"));
-		out += String.format("Cars on road: %d\n", js.get("carsOnRoad"));
+		out += String.format("Elapsed time: %d\n", js.elapsedTime);
+		out += String.format("Cars on road: %d\n", js.carsOnRoad);
 		out += ("Current Queues:\n");
 		out += String.format("  North: %d\n", queues.get("North"));
 		out += String.format("  East:  %d\n", queues.get("East"));
 		out += String.format("  South: %d\n", queues.get("South"));
 		out += String.format("  West:  %d\n", queues.get("West"));
 		out += String.format("Total cars in junction: %d\n", queues.get("Total"));
-		out += String.format("Total cars passed in junction: %d\n", js.get("totalCarsPassed"));
+		out += String.format("Total cars passed in junction: %d\n", js.totalCarsPassed);
 		out += ("--------------------------");
 
 		return out;
