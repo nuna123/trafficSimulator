@@ -259,7 +259,7 @@ public class JunctionController {
 		}
 		if (animator[0] != null)
 			try {
-				animator[0].configureFrame(this);
+				animator[0].printFrame(this);
 			} catch (IOException e) {
 				JunctionController.log("ERR from Animator.configureFrame: "); 
 				e.printStackTrace();
@@ -291,7 +291,7 @@ public class JunctionController {
 					{
 						this.tick();
 						try {
-							animator[0].configureFrame(this);
+							animator[0].printFrame(this);
 						} catch (IOException e) {
 							JunctionController.log("ERR from Animator.configureFrame: "); 
 							e.printStackTrace();

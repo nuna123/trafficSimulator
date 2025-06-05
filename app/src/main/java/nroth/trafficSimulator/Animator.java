@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.function.Function;
 
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.TextColor;
@@ -12,62 +11,67 @@ import com.googlecode.lanterna.TextColor.ANSI;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
-
+/**
+ * Animator - controlls the animation of the junction
+ */
 public class Animator {
 
 	private final Terminal _terminal;
 	private final TextGraphics textGraphics;
 
-
-	//holder for the car position calculation functions
-
-	// 0 = North → Y increases
-	// 1 = East → X decreases
-	// 2 = South → Y decreases
-	// 3 = West → X increases
-
-
-
-	//constants needed for displaying
-	public class constants
+	/**
+	 * All constants held for animation. Includes coordinates, colors, characters.
+	 */
+	private final static class constants
 	{
-		final static int[][] lanePointZero = {
+		/**Starting position of each car */
+		final static int[][] LANE_PNT_ZERO = {
 				{19, 4},	// North
 				{29, 6},	// East
 				{25, 10},	// South
 				{15, 8}		// West
 		};
-		final static int laneSize_Y = 5; // for cars coming from N or S
-		final static int laneSize_X = 13; // for cars coming from E or W
 
-		final static char carChar = 'X';
-		final static int[][] map_limits = {{11,33}, {2,12}};
-		final static int[][] titlePos = {
+		/**Lane width, how many units to cross the junction */
+		final static int LANE_SIZE_Y = 5; // for cars coming from N or S
+		final static int LANE_SIZE_X = 13; // for cars coming from E or W
+
+		/** character representing cars on the map */
+		final static char CAR_CHAR = 'X';
+
+		/** Map charaters are kept away from border. */
+		final static int[][] MAP_LIMS = {{11,33}, {2,12}};
+		final static int[][] TITLE_POS = {
 				{21, 1}, //N
 				{36, 7}, //E
 				{22, 14}, //S
 				{7, 7} //W
 			};
 
-		final static TextColor.ANSI ANSIdefaultColor = TextColor.ANSI.WHITE;
-		final static TextColor.ANSI[] ANSIcolorArr = {
+		/** Colors for cars in different directions, and the default color
+		 * this is used for printing on Lanterna terminal */
+		final static TextColor.ANSI ANSI_WHITE = TextColor.ANSI.WHITE;
+		final static TextColor.ANSI[] ANSI_COLOR_ARR = {
 			TextColor.ANSI.RED,
 			TextColor.ANSI.GREEN,
 			TextColor.ANSI.BLUE,
 			TextColor.ANSI.YELLOW};
-
-
-		final static String strResetColor = "\u001B[0m";
+			
+			
+		/** Colors for cars in different directions, and the default color
+		 * this is used for printing on console terminal 
+		 * NOT CURRENTLY IN USE*/
+		final static String STR_WHITE = "\u001B[0m";
 		// ANSI color codes for directions:
-		final static String[] strColorArr = {
+		final static String[] STR_COLOR_ARR = {
 				"\u001B[31m", // North - Red
 				"\u001B[32m", // East  - Green
 				"\u001B[33m", // South - Yellow
 				"\u001B[34m"  // West  - Blue
 			};
 
-
-		final static String[] mapStringArr =
+		/** Empty map for initialization */
+		final static String[] MAP_STR =
 			{
 				"                    NORTH                  ",
 				"                |   (  )    |              ",
@@ -88,28 +92,32 @@ public class Animator {
 			};
 	}
 	
-	//actual map handling
+	/** Car position calculations, map creation */
 	private class JunctionMap{
 
 		String[] mapStringArr;
 		String[] colorMap;
 
+		/**
+		 * initializes {@link mapStringArr} and {@link colorMap}
+		 */
 		public JunctionMap()
 		{
-			mapStringArr = Arrays.stream(constants.mapStringArr).toArray(String[]::new);
+			mapStringArr = Arrays.stream(constants.MAP_STR).toArray(String[]::new);
 			colorMap =  new String[mapStringArr.length + 1];
-
-			for (int i= 0; i < colorMap.length; i++)
-				colorMap[i] = new String(new char[45]).replace('\0', ' ');
 		}
 		
+		/**
+		 * Adds car queue titles to {@link mapStringArr}
+		 * @param carQueues	how many cars are in each lane 
+		 */
 		public void addTitles (int[] carQueues){
 			char[] chararr;
 			int[] titlePos;
 
 			for (int i = 0; i < carQueues.length ; i++)
 			{
-				titlePos = constants.titlePos[i];
+				titlePos = constants.TITLE_POS[i];
 
 				//max 2 digits
 				if (carQueues[i] > 99)
@@ -122,6 +130,12 @@ public class Animator {
 			}
 		}
 
+		/**
+		 * adds character to the map, without color. 
+		 * if position is not within map, nothing happens
+		 * @param c	character to add
+		 * @param pos	position in which to place 'c'
+		 */
 		public void addChar(char c, int[] pos) {
 			//check that character is within bounds of map
 			if (pos[0] < 0 || pos[0] >= mapStringArr[0].length()
@@ -132,14 +146,26 @@ public class Animator {
 			this.mapStringArr[pos[1]] = new String(row);
 		}
 
+		/**
+		 * Adds car to the map, uses {@link constants.CAR_CHAR} 
+		 * if position is not within map borders, nothing happens
+		 * @param pos	position in which to place car
+		 */
 		public void addCar(int[] pos) {
 			//check that car is within defined map limits
-			if (pos[0] < constants.map_limits[0][0] || pos[0] > constants.map_limits[0][1]
-			|| pos[1] < constants.map_limits[1][0] || pos[1] > constants.map_limits[1][1] )
+			if (pos[0] < constants.MAP_LIMS[0][0] || pos[0] > constants.MAP_LIMS[0][1]
+			|| pos[1] < constants.MAP_LIMS[1][0] || pos[1] > constants.MAP_LIMS[1][1] )
 				return;
-			addChar(constants.carChar, pos);
+			addChar(constants.CAR_CHAR, pos);
 		}
 
+		/**
+		 * adds a color character to map, 
+		 * will later print character from mapStringArr in the same position in color
+		 * colors are defined in {@link constants}
+		 * @param pos
+		 * @param dirIdx
+		 */
 		public void addToColorMap(int[] pos, int dirIdx)
 		{
 			//check that car is within defined map array
@@ -147,19 +173,34 @@ public class Animator {
 			|| pos[1] < 0 || pos[1] >= mapStringArr.length )
 				return;
 			String row = (colorMap[pos[1]]);
+			if (row == null)
+				row = new String(new char[mapStringArr[0].length() + 2]);
 			char[] row_c =row.toCharArray();
 			row_c[pos[0]] = (char) (dirIdx + (int)'0');
 
 			colorMap[pos[1]] = new String(row_c);
 		}
+		
+		
+		/**
+		 * calculates where car should be on the map according to it's direction
+		 * Direction Index + direction:
+		 *  0 = North → Y increases
+		 *  1 = East → X decreases
+		 *  2 = South → Y decreases
+		 *  3 = West → X increases
+		 * @param car	car to print
+		 * @param directionIndex	direction it comes from
+		 * @return the position in map in form int[]
+		 */
 		public static int[] CarPositionCalculator(Car car, int directionIndex)
 		{
-			int[] startPoint = constants.lanePointZero[directionIndex].clone();
+			int[] startPoint = constants.LANE_PNT_ZERO[directionIndex].clone();
 
 			boolean isVertical = (directionIndex % 2 == 0); // true for N/S, false for E/W
 			int directionSign = (directionIndex % 3 == 0 ? 1 : -1); // 1 for N/W, -1 for S/E
 
-			float laneLength = isVertical ? constants.laneSize_Y : constants.laneSize_X;
+			float laneLength = isVertical ? constants.LANE_SIZE_Y : constants.LANE_SIZE_X;
 			int positionOffset = 0;
 
 			if (car.posInJunction <= 0)
@@ -181,6 +222,14 @@ public class Animator {
 			return startPoint;
 		}
 
+		/**
+		 * iterates over Cars linkedList,
+		 * calculates position for each,
+		 * adds to mapStringArr,
+		 * adds color to colorMap
+		 * @param dirIdx
+		 * @param allCars
+		 */
 		public void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
 		{
 			allCars.forEach((Car c) -> {
@@ -194,6 +243,10 @@ public class Animator {
 			
 		}
 
+		/**
+		 * Prints, with color, using system.out()
+		 * not currently used.
+		 */
 		public void printWithColor ()
 		{
 			System.out.printf("%c[2J%c[;H",(char) 27, (char) 27);
@@ -217,9 +270,9 @@ public class Animator {
 						{
 							colorChar -= '0';
 							System.out.printf("%s%c%s",
-								constants.strColorArr[colorChar],
+								constants.STR_COLOR_ARR[colorChar],
 								mapRow[x],
-								constants.strResetColor);
+								constants.STR_WHITE);
 						}
 						else
 							System.out.print(mapRow[x]);
@@ -232,6 +285,9 @@ public class Animator {
 
 	}
 	
+	/**
+	 * kills the terminal. used by Shutdown hook in {@link JunctionController.start}
+	 */
 	public void shutdown ()
 	{
 		try {
@@ -243,6 +299,10 @@ public class Animator {
 		}
 	}
 
+	/**
+	 * creates Terminal and textGraphics, used for displaying animation
+	 * @throws IOException
+	 */
 	public Animator ()
 	throws IOException
 	{
@@ -250,6 +310,13 @@ public class Animator {
 		textGraphics =  _terminal.newTextGraphics();
 	}
 
+	/**
+	 * iterates over JunctionMap,
+	 * prints to _terminal while referencing colorMap to add color.
+	 * @param jm	JunctionMap to print
+	 * @param messageString	Message, current state information, to print
+	 * @throws IOException
+	 */
 	public void printOnTerminal (JunctionMap jm, String messageString)
 				throws IOException
 	{		
@@ -278,10 +345,10 @@ public class Animator {
 					if (colorChar != ' ')
 					{
 						int colorIdx = colorChar - '0';
-						if (colorIdx >= 0 && colorIdx < constants.ANSIcolorArr.length)
-							textGraphics.setForegroundColor(constants.ANSIcolorArr[colorIdx]);
+						if (colorIdx >= 0 && colorIdx < constants.ANSI_COLOR_ARR.length)
+							textGraphics.setForegroundColor(constants.ANSI_COLOR_ARR[colorIdx]);
 						textGraphics.putString(x, y, String.valueOf(mapRow[x]));
-						textGraphics.setForegroundColor(constants.ANSIdefaultColor);
+						textGraphics.setForegroundColor(constants.ANSI_WHITE);
 					}
 					else
 						textGraphics.putString(x, y, String.valueOf(mapRow[x]));
@@ -293,9 +360,13 @@ public class Animator {
 		_terminal.flush();
 	}
 
-
-
-	JunctionMap configureFrame(JunctionController jc)
+	/**
+	 * initializes info, creates {@link JunctionMap} and prints it.
+	 * @param jc	JunctionController to print
+	 * @return		The figured map
+	 * @throws IOException
+	 */
+	JunctionMap printFrame(JunctionController jc)
 	throws IOException
 	{
 		JunctionMap newMap = new JunctionMap();

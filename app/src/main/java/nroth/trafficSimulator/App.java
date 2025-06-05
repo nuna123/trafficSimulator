@@ -1,5 +1,6 @@
 package nroth.trafficSimulator;
 
+
 import java.util.Map;
 
 
@@ -42,6 +43,8 @@ public class App {
 
 
 		jc.start(-1);
+
+
 		JunctionController.log("MAIN: Back in main. exiting ...");
 	}
 }
