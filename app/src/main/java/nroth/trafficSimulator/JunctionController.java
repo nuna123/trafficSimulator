@@ -265,7 +265,8 @@ public class JunctionController {
 			if (JunctionController._elapsedTime < timeLimit_sec)
 			{
 				JunctionController.log("[!] Non-peaceful termination: Ctrl+C");
-				scheduler.shutdownNow();  // Optional: force shutdown
+				animator[0].shutdown();
+				scheduler.shutdownNow();
 			}
 			JunctionController.log(this.summary());
 		}));
@@ -286,6 +287,7 @@ public class JunctionController {
 					}
 				else{
 					scheduler.shutdown();
+					animator[0].shutdown();
 					JunctionController.log("[!] Time limit reached! Shutting down scheduler.");
 				}
 			}

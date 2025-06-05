@@ -311,6 +311,17 @@ public class Animator {
 
 	}
 	
+	public void shutdown ()
+	{
+		try {
+			this._terminal.close();
+		}
+		catch (IOException e)
+		{
+			System.err.println(e);
+		}
+	}
+
 	public Animator ()
 	throws IOException
 	{
@@ -404,7 +415,6 @@ public class Animator {
 
 		try{
 			printOnTerminal(newMap, message);
-
 		} catch (IOException e)
 		{
 			System.out.println(e);
