@@ -317,7 +317,7 @@ public class Animator {
 	 * @param messageString	Message, current state information, to print
 	 * @throws IOException
 	 */
-	public void printOnTerminal (JunctionMap jm, String messageString)
+	private void printOnTerminal (JunctionMap jm, String messageString)
 				throws IOException
 	{		
 

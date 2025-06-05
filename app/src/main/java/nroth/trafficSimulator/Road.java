@@ -39,6 +39,10 @@ public class Road {
 	public Queue<Car> getWaitingCars() {return new LinkedList<>(_waitingCarsQueue);}
 	public Queue<Car> getPassedCars() {return new LinkedList<>(_passedCarsQueue);}
 
+	/**
+	 * Advances cars in _passedCarsQueue by 1
+	 * if car position > 3, removes it
+	 */
 	public void advancePassedCars()
 	{
 		Iterator<Car> carIterator = _passedCarsQueue.iterator();
@@ -57,6 +61,10 @@ public class Road {
 		}
 		_passedCarsQueue.removeAll(carsToRemove);
 	}
+
+	/**
+	 * Updates car's position to be from 0, descending, according to their position in _waitingCarsQueue
+	 */
 	public void updateWaitingCars()
 	{
 		Iterator<Car> carIterator = _waitingCarsQueue.iterator();
@@ -73,6 +81,13 @@ public class Road {
 		}
 	}
 
+	/**
+	 * advances cars on road by 1/car.posInJunction
+	 * if car position > 1, moves to _passedCars
+	 * if car position > 1, it will be reset to 0 before moving.
+	 * 	this function is expected to be followed by {@link advancePassedCars} which will handle it's movement
+	 * @return if any cars passed
+	 */
 	public int advanceCarsOnRoad()
 	{
 		int passedCars = 0;
@@ -88,7 +103,7 @@ public class Road {
 
 			if (currCar.posInJunction >= 1)
 			{
-				currCar.posInJunction = 0; // make sure its not some float, 0 so it will be advanced by advancePassedCars 
+				currCar.posInJunction = 0; // 0 so it will be advanced by advancePassedCars 
 				_passedCarsQueue.add(currCar);
 				passedCars ++;
 			}
@@ -99,8 +114,8 @@ public class Road {
 
 	/**
 	 * Runs every second while road has green light.
-	 * goes over all cars, advances if theyre on the road,
-	 * calculates if have time to pass if car is at position 0
+	 * goes over all cars, advances them.
+	 * if car is at position 0, calculates if it can enters road
 	 * @param secInLight seconds left in this road phase
 	 * @return	mapped values of current carsOnRoad and carsPassed
 	 */
@@ -126,7 +141,7 @@ public class Road {
 
 
 	/**
-	 * prints cars in road queue
+	 * prints cars in  _waitingCarsQueue
 	 */
 
 	@Override

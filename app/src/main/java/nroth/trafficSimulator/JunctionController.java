@@ -38,6 +38,10 @@ public class JunctionController {
 	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
 	public JunctionPhase getPhase(){return this._currentPhase;}
 
+	/**
+	 * initializes JunctionController using config from ConfigReader
+	 * @param config
+	 */
 	public JunctionController(Map<String, Integer> config) {
 		_config = new HashMap<>(config);
 		_currentPhase = new JunctionPhase();
@@ -152,6 +156,14 @@ public class JunctionController {
 		System.out.println(fullMessage);
 	}
 
+	/**
+	 * logs and prints a formatted version of msg with time
+	 * appends 'style' string to beginning of msg, and resets style at the end.
+	 * Message does not have syyling in Logfile.
+	 * Is static to allow printing using the correct time value without instantiating JunctionController 
+	 * @param msg
+	 * @param style
+	 */
 	public static void log (String msg, String style)
 	{
 		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
