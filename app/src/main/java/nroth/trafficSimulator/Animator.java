@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.TextColor.ANSI;
+import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 /**
@@ -56,6 +59,8 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 public class Animator {
 
 	private final Terminal _terminal;
+	private final TextGraphics textGraphics;
+
 
 	//holder for the car position calculation functions
 	public class calcCarPositions {
@@ -136,13 +141,23 @@ public class Animator {
 				{22, 14}, //S
 				{7, 7} //W
 			};
-		final static String resetColor = "\u001B[0m";
-		final static String[] colorArr = {
+
+		final static TextColor.ANSI ANSIdefaultColor = TextColor.ANSI.WHITE;
+		final static TextColor.ANSI[] ANSIcolorArr = {
+			TextColor.ANSI.RED,
+			TextColor.ANSI.GREEN,
+			TextColor.ANSI.BLUE,
+			TextColor.ANSI.YELLOW};
+
+
+		final static String strResetColor = "\u001B[0m";
+		final static String[] strColorArr = {
 				"\u001B[31m", // North 
 				"\u001B[32m", //East
 				"\u001B[33m", //South
 				"\u001B[34m" //West
 			};
+
 
 		final static String[] mapStringArr =
 			{
@@ -281,9 +296,9 @@ public class Animator {
 						{
 							colorChar -= '0';
 							System.out.printf("%s%c%s",
-								constants.colorArr[colorChar],
+								constants.strColorArr[colorChar],
 								mapRow[x],
-								constants.resetColor);
+								constants.strResetColor);
 						}
 						else
 							System.out.print(mapRow[x]);
@@ -294,18 +309,60 @@ public class Animator {
 			}
 		}
 
-		public void printOnTerminal ()
-		{
-			//TODO: print on  _terminal
-			// https://github.com/mabe02/lanterna/blob/master/docs/tutorial/Tutorial02.md
-		}
 	}
-
+	
 	public Animator ()
 	throws IOException
 	{
 		_terminal =  (new DefaultTerminalFactory()).createTerminal();
+		textGraphics =  _terminal.newTextGraphics();
 	}
+
+	public void printOnTerminal (JunctionMap jm, String messageString)
+				throws IOException
+	{
+		// https://github.com/mabe02/lanterna/blob/master/docs/tutorial/Tutorial02.md
+		
+		_terminal.clearScreen();
+
+		char[] colorRow;
+		char[] mapRow;
+		
+
+		char colorChar;
+
+		for (int y = 0; y <  jm.mapStringArr.length ; y++)
+		{
+			if (jm.colorMap[y] == null || jm.colorMap[y].isBlank())
+				textGraphics.putString(0, y, jm.mapStringArr[y]);
+			else 
+			{
+				mapRow = jm.mapStringArr[y].toCharArray();
+				colorRow = jm.colorMap[y].toCharArray();
+
+				for (int x = 0; x < jm.mapStringArr[y].length() ; x++)
+				{
+
+					colorChar = colorRow[x];
+					if (colorChar != ' ')
+					{
+						int colorIdx = colorChar - '0';
+						if (colorIdx >= 0 && colorIdx < constants.ANSIcolorArr.length)
+							textGraphics.setForegroundColor(constants.ANSIcolorArr[colorIdx]);
+						textGraphics.putString(x, y, String.valueOf(mapRow[x]));
+						textGraphics.setForegroundColor(constants.ANSIdefaultColor);
+					}
+					else
+						textGraphics.putString(x, y, String.valueOf(mapRow[x]));
+				}
+			}
+		}
+		textGraphics.putString(0, jm.mapStringArr.length + 1, messageString);
+		
+		_terminal.flush();
+	}
+
+
 
 	JunctionMap configureFrame(JunctionController jc)
 	{
@@ -313,6 +370,10 @@ public class Animator {
 		//figure out what cars are on the road, and which are waiting in queue
 		int[] carQueues = {0,0,0,0};
 		LinkedList<Car> allCars;
+
+		var jc_state = jc.getJunctionState();
+		String stateString = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
+		String message =String.format("[%ds]\t%s\n", jc_state.get("elapsedTime"), stateString);
 
 
 		//go over each road.
@@ -338,12 +399,17 @@ public class Animator {
 		//actually build map
 		newMap.addTitles(carQueues);
 		
-		newMap.printWithColor();
-		newMap.printOnTerminal();
-		var jc_state = jc.getJunctionState();
-		String msg = (jc_state.get("currentPhase").equals("NS_GREEN") ? "North -> South (phase A)" : "East -> West (phase B)");
-		System.out.printf("[%ds]\t%s\n", jc_state.get("elapsedTime"), msg);
+		// newMap.printWithColor(); // printer for user console
+		// System.out.print(message);
 
+		try{
+			printOnTerminal(newMap, message);
+
+		} catch (IOException e)
+		{
+			System.out.println(e);
+			System.exit(1);
+		}
 		return newMap;
 	}
 

@@ -225,6 +225,7 @@ class JunctionControllerTest {
 		Map<String, Object> state = controller.getJunctionState();
 
 		int elapsed = (int) state.get("elapsedTime");
-		assertTrue(elapsed == timeLimit, "Simulation should run for the specified time limit");
+		assertEquals(timeLimit, elapsed);
+		// assertTrue(elapsed == timeLimit, "Simulation should run for the specified time limit");
 	}
 }

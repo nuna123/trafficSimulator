@@ -148,7 +148,7 @@ public class JunctionController {
 		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
 
 		_logger.info(fullMessage);
-		// System.out.println(fullMessage);
+		System.out.println(fullMessage);
 	}
 
 	public static void log (String msg, String style)
@@ -156,7 +156,7 @@ public class JunctionController {
 		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
 		
 		_logger.info(fullMessage);
-		// System.out.println(style + fullMessage + "\033[0m");
+		System.out.println(style + fullMessage + "\033[0m");
 	}
 
 	/**
@@ -250,8 +250,14 @@ public class JunctionController {
 		}
 
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-		Animator animator = new Animator();
-		animator.configureFrame(this);
+		Animator[] animator = new Animator[1];
+		try {
+			animator[0] = new Animator();
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+		if (animator[0] != null)
+			animator[0].configureFrame(this);
 
 		// Add shutdown hook to catch Ctrl+C
 		// Note: Gradle runtime environment interferes with this, output will be shown in logs but not console
@@ -276,7 +282,7 @@ public class JunctionController {
 				if (timeLimit_sec == -1 || JunctionController._elapsedTime < timeLimit_sec)
 					{
 						this.tick();
-						animator.configureFrame(this);
+						animator[0].configureFrame(this);
 					}
 				else{
 					scheduler.shutdown();
