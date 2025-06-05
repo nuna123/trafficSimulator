@@ -1,5 +1,7 @@
 package nroth.trafficSimulator;
 
+import nroth.trafficSimulator.Animator;
+
 import java.io.*;
 import java.util.*;
 
@@ -102,6 +104,10 @@ public class ConfigReader {
 		// S cannot be larger than X1/X2, how would a car cross the road?
 		if (c.S() > c.X1() || c.S() > c.X2())
 			throw new InvalidValueException ("S cannot be larger than X1/X2!");
+
+		// If values are too large, animation doesnt work as expected
+		if (c.S() > Animator.constants.LANE_SIZE_X || c.S() > Animator.constants.LANE_SIZE_Y )
+			JunctionController.printWarning("Warning! Because S is larger than the animation lane, cars may be printed unexpectedly.");
 
 		return c;
 	}

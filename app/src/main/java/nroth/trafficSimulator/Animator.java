@@ -21,7 +21,7 @@ public class Animator {
 	/**
 	 * All constants held for animation. Includes coordinates, colors, characters.
 	 */
-	private final static class constants
+	public final static class constants
 	{
 		/**Starting position of each car */
 		final static int[][] LANE_PNT_ZERO = {
@@ -55,10 +55,10 @@ public class Animator {
 			TextColor.ANSI.GREEN,
 			TextColor.ANSI.BLUE,
 			TextColor.ANSI.YELLOW};
-			
-			
+
+
 		/** Colors for cars in different directions, and the default color
-		 * this is used for printing on console terminal 
+		 * this is used for printing on console terminal
 		 * NOT CURRENTLY IN USE*/
 		final static String STR_WHITE = "\u001B[0m";
 		// ANSI color codes for directions:
@@ -90,7 +90,7 @@ public class Animator {
 				"                    SOUTH                  "
 			};
 	}
-	
+
 	/** Car position calculations, map creation */
 	private class JunctionMap{
 
@@ -105,10 +105,10 @@ public class Animator {
 			mapStringArr = Arrays.stream(constants.MAP_STR).toArray(String[]::new);
 			colorMap =  new String[mapStringArr.length + 1];
 		}
-		
+
 		/**
 		 * Adds car queue titles to {@link mapStringArr}
-		 * @param carQueues	how many cars are in each lane 
+		 * @param carQueues	how many cars are in each lane
 		 */
 		public void addTitles (int[] carQueues){
 			char[] chararr;
@@ -130,7 +130,7 @@ public class Animator {
 		}
 
 		/**
-		 * adds character to the map, without color. 
+		 * adds character to the map, without color.
 		 * if position is not within map, nothing happens
 		 * @param c	character to add
 		 * @param pos	position in which to place 'c'
@@ -146,7 +146,7 @@ public class Animator {
 		}
 
 		/**
-		 * Adds car to the map, uses {@link constants.CAR_CHAR} 
+		 * Adds car to the map, uses {@link constants.CAR_CHAR}
 		 * if position is not within map borders, nothing happens
 		 * @param pos	position in which to place car
 		 */
@@ -159,7 +159,7 @@ public class Animator {
 		}
 
 		/**
-		 * adds a color character to map, 
+		 * adds a color character to map,
 		 * will later print character from mapStringArr in the same position in color
 		 * colors are defined in {@link constants}
 		 * @param pos
@@ -179,8 +179,8 @@ public class Animator {
 
 			colorMap[pos[1]] = new String(row_c);
 		}
-		
-		
+
+
 		/**
 		 * calculates where car should be on the map according to it's direction
 		 * Direction Index + direction:
@@ -199,7 +199,7 @@ public class Animator {
 			boolean isVertical = (directionIndex % 2 == 0); // true for N/S, false for E/W
 			int directionSign = (directionIndex % 3 == 0 ? 1 : -1); // 1 for N/W, -1 for S/E
 
-			float laneLength = isVertical ? constants.LANE_SIZE_Y : constants.LANE_SIZE_X;
+			int laneLength = isVertical ? constants.LANE_SIZE_Y : constants.LANE_SIZE_X;
 			int positionOffset = 0;
 
 			if (car.posInJunction <= 0)
@@ -213,11 +213,11 @@ public class Animator {
 			positionOffset *= directionSign;
 
 			// For N/S, Y changes; for E/W, X changes
-			if (isVertical) 
+			if (isVertical)
 				startPoint[1] = startPoint[1] + positionOffset;
-			else 
+			else
 				startPoint[0] = startPoint[0] + positionOffset;
-			
+
 			return startPoint;
 		}
 
@@ -239,7 +239,7 @@ public class Animator {
 
 			});
 
-			
+
 		}
 
 		/**
@@ -257,7 +257,7 @@ public class Animator {
 			{
 				if (colorMap[y] == null)
 					System.out.println(mapStringArr[y]);
-				else 
+				else
 				{
 					for (int x = 0; x < mapStringArr[y].length() ; x++)
 					{
@@ -278,12 +278,12 @@ public class Animator {
 					}
 					System.out.print("\n");
 				}
-				
+
 			}
 		}
 
 	}
-	
+
 	/**
 	 * kills the terminal. used by Shutdown hook in {@link JunctionController.start}
 	 */
@@ -318,13 +318,13 @@ public class Animator {
 	 */
 	private void printOnTerminal (JunctionMap jm, String messageString)
 				throws IOException
-	{		
+	{
 
 		_terminal.clearScreen();
 
 		char[] colorRow;
 		char[] mapRow;
-		
+
 
 		char colorChar;
 
@@ -332,7 +332,7 @@ public class Animator {
 		{
 			if (jm.colorMap[y] == null || jm.colorMap[y].isBlank())
 				textGraphics.putString(0, y, jm.mapStringArr[y]);
-			else 
+			else
 			{
 				mapRow = jm.mapStringArr[y].toCharArray();
 				colorRow = jm.colorMap[y].toCharArray();
@@ -355,7 +355,7 @@ public class Animator {
 			}
 		}
 		textGraphics.putString(0, jm.mapStringArr.length + 1, messageString);
-		
+
 		_terminal.flush();
 	}
 
@@ -397,7 +397,7 @@ public class Animator {
 
 		//may throw IOEXCEPTION
 		printOnTerminal(newMap, message);
-		
+
 		return newMap;
 	}
 

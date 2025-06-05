@@ -195,6 +195,21 @@ public class JunctionController {
 	}
 
 	/**
+	 * logs a formatted version of msg with time, as debug message
+	 * Is static to allow printing using the correct time value without instantiating JunctionController
+	 * @param msg
+	 */
+	public static void printWarning (String msg)
+	{
+		String orangeColor = " \033[38;5;208m";
+		String resetColor = "\033[0m";
+		String fullMessage = String.format("[%ds]\t%s", _elapsedTime, msg);
+
+		System.out.println(String.format ("%s%s%s", orangeColor, fullMessage, resetColor));
+		_logger.info(fullMessage);
+	}
+
+	/**
 	 * handles phase switching, evaluates if switch is needed - if cars are waiting on the perpendicular road
 	 */
 	private void switchPhase ()
