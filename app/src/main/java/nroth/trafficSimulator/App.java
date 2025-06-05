@@ -2,36 +2,38 @@ package nroth.trafficSimulator;
 
 
 import java.util.Map;
+import nroth.trafficSimulator.ConfigReader.Config;
 
 
 public class App {
 	private static final String CONFIGFILE = "config.properties";
 
-	static Map <String, Integer>  getConfig(){
+	static Config getConfig(){
 		ConfigReader cr;
+		Config config = null;
 		try {
 			cr = new ConfigReader(CONFIGFILE);
-			cr.readConfigFile();
+			config = cr.readConfigFile();
 		} catch (Exception e)
 		{
 			System.out.print(e);
 			return null;
 		}
 
-		return cr.getMappedConfig();
+		return config;
 	}
 
  public static void main(String[] args) {
 
 
-		Map <String, Integer> config = getConfig();
+		var config = getConfig();
 		if (config == null){
 			System.out.println("\nconfig is null, exiting....");
 			return;
 		}
 		JunctionController.log("MAIN: CONFIG:" + config);
 
-		JunctionController jc = new JunctionController(config);
+		var jc = new JunctionController(config);
 
 		try{
 			jc.addCar('N', 3);

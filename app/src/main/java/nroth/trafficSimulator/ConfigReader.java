@@ -21,6 +21,7 @@ public class ConfigReader {
 			"A3",
 			"A4");
 
+	public record Config (Integer X1, Integer X2, Integer S, Integer A1, Integer A2, Integer A3, Integer A4){};
 
 	public String getFilePath (){return _filePath;}
 	public Map<String, Integer> getMappedConfig (){return (_mappedConfig == null ? null : Collections.unmodifiableMap(_mappedConfig));}
@@ -44,65 +45,66 @@ public class ConfigReader {
 	}
 
 	/**
-	 * makes sure all required values are present.
+	 * fills the config record from Properties file.
+	 * By this point we know properties file has all fields and they are integers
+	 * @param properties 
+	 * @return Config variable
+	 */
+	public Config fillConfig(Properties properties)
+	{
+		Config c = new Config(Integer.parseInt(
+			properties.getProperty("X1")),
+			Integer.parseInt (properties.getProperty("X2")),
+			Integer.parseInt (properties.getProperty("S")),
+			Integer.parseInt (properties.getProperty("A1")),
+			Integer.parseInt (properties.getProperty("A2")),
+			Integer.parseInt (properties.getProperty("A3")),
+			Integer.parseInt (properties.getProperty("A4"))
+			);
+		
+		return c;
+	}
+
+	/**
+	 * makes sure all required values are present and are integers
 	 * validates value are valid
 	 * @param config	config Map to read from
 	 * @throws MissingKeyException
 	 * @throws InvalidValueException
 	 */
-	private void validateValues (Map<String, Integer> config)
+	private Config validateValues (Properties properties)
 				throws MissingKeyException, InvalidValueException
 	{
-		// check that all needed values exist
+		// check that all needed values exist, all are integers
 		for (String key : _requiredKeys) {
-			if (!config.containsKey(key))
-				throw new MissingKeyException("Missing Key " + key + " in config file!");
-		}
-
-		
-		//only A[1-4] can be smaller than 1
-		// A[1-4] can be a positive integer, or -1.
-		for (String key : _requiredKeys) {
-			if (!key.startsWith("A") && config.get(key) < 1)
-				throw new InvalidValueException("Value of " + key + " cannot less than 1!");
-			else if (key.startsWith("A") && config.get(key) != -1 && config.get(key) < 1)
-				throw new InvalidValueException("Value of " + key + " can be a positive integer, or -1.");
-		}
-
-		// S cannot be larger than X1/X2, how would a car cross the road?
-		if (config.get("S") > config.get("X1")
-			|| config.get("S") > config.get("X2"))
-		{ throw new InvalidValueException ("S cannot be larger than X1/X2!"); }
-
-	}
-
-	/**
-	 * Converts the given Properties object to Map <String, Integer>.
-	 * Validates values using validateValues() function
-	 *
-	 * @param properties The Properties object to convert from
-	 * @return Map<String, Integer>
-	 * @throws MissingKeyException (from ValidateValues)
-	 * @throws InvalidValueException (from ValidateValues)
-	 * @throws NumberFormatException
-	 */
-	private Map<String, Integer> propertiesToMap(Properties properties)
-			throws MissingKeyException, InvalidValueException, NumberFormatException {
-		Map<String, Integer> intMap = new HashMap<>();
-
-
-		for (String key : properties.stringPropertyNames()) {
-			Integer num;
+			if (!properties.containsKey(key))
+				throw new MissingKeyException("Missing Key " + key + " in properties file!");
 			try{
-				num = Integer.valueOf(properties.getProperty(key));
+				Integer.valueOf(properties.getProperty(key));
 			}
 			catch(NumberFormatException e){
 				throw new NumberFormatException(properties.getProperty(key) + " could not be converted to integer!\n");
 			}
-			intMap.put(key, num);
 		}
-		validateValues(intMap);
-		return intMap;
+		Config c = fillConfig(properties);
+
+		//only A[1-4] can be smaller than 1
+		// A[1-4] can be a positive integer, or -1.
+		Integer value;
+		for (String key : _requiredKeys) {
+			value = Integer.parseInt((String) properties.get(key));
+
+			if (!key.startsWith("A") && value < 1)
+				throw new InvalidValueException("Value of " + key + " cannot less than 1!");
+			else if (key.startsWith("A") && value != -1 && value < 1)
+				throw new InvalidValueException("Value of " + key + " can be a positive integer, or -1.");
+		}
+
+		// S cannot be larger than X1/X2, how would a car cross the road?
+		if (c.S() > c.X1() || c.S() > c.X2())
+			throw new InvalidValueException ("S cannot be larger than X1/X2!");
+
+		return c;
 	}
 
 	/**
@@ -112,7 +114,7 @@ public class ConfigReader {
 	 *
 	 * @return Map<String, Integer>
 	 */
-	public Map<String, Integer> readConfigFile()
+	public Config readConfigFile()
 		throws MissingKeyException,
 		InvalidValueException,
 		NumberFormatException,
@@ -122,10 +124,12 @@ public class ConfigReader {
 		InputStream propsInput = App.class.getClassLoader().getResourceAsStream(_filePath);
 		Properties prop = new Properties();
 		prop.load(propsInput);
-		_mappedConfig = propertiesToMap(prop);
+
+		Config config = validateValues(prop);
+	
 		propsInput.close();
 
-		return _mappedConfig;
+		return config;
 	}
 
 

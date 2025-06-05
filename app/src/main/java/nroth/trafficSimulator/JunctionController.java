@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import nroth.trafficSimulator.ConfigReader.Config;
+
 /**
  * JUNCTIONCONTROLER
  * controlls the whole junction and phase switching.
@@ -25,7 +28,7 @@ public class JunctionController {
 	public enum PhaseValue { //pre-set values for each phase
 		NS_GREEN, EW_GREEN
 	}
-	private final Map<String, Integer> _config;	// config map obtained from ConfigReader class
+	private final Config _config;	// config map obtained from ConfigReader class
 	private final int[] _carArrivals;			// timing of car arrival to roads
 	private final Road[] _roads;				// Road class objects, array of 4 - one for each compass direction
 	private final JunctionPhase _currentPhase;	// Custom class containing all information about the current phase
@@ -38,25 +41,27 @@ public class JunctionController {
 
 
 	public Road[] getRoads() {return _roads;}
-	public Map<String, Integer> getConfig() {return (_config == null ? null : Collections.unmodifiableMap(_config));}
+	public Config getConfig() {return _config;}
 	public JunctionPhase getPhase(){return this._currentPhase;}
 
 	/**
 	 * initializes JunctionController using config from ConfigReader
 	 * @param config
 	 */
-	public JunctionController(Map<String, Integer> config) {
-		_config = new HashMap<>(config);
+	public JunctionController(Config config) {
+		_config = config;
 		_currentPhase = new JunctionPhase();
 
 		_roads = new Road[4];
 		String[] roadnames = {"North", "East", "South", "West"};
 		for (int i = 0; i < 4; i++)
-			_roads[i] = new Road(_config.get("S"), roadnames[i]);
+			_roads[i] = new Road(_config.S(), roadnames[i]);
 
 		_carArrivals = new int[4];
-		for (int i = 1; i <= 4; i++)
-			_carArrivals[i - 1] = _config.get("A" + String.valueOf(i));
+		_carArrivals[0] = config.A1();
+		_carArrivals[1] = config.A2();
+		_carArrivals[2] = config.A3();
+		_carArrivals[3] = config.A4();
 	}
 
 	/**
@@ -371,7 +376,7 @@ public class JunctionController {
 		 * @return phase length
 		 */
 		private int getPhaseLen() {
-			return (this.phase == PhaseValue.NS_GREEN ? _config.get("X1") : _config.get("X2"));
+			return (this.phase == PhaseValue.NS_GREEN ? _config.X1() : _config.X2());
 		}
 
 

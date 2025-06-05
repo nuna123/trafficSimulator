@@ -3,32 +3,30 @@ package nroth.trafficSimulator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nroth.trafficSimulator.JunctionController.JunctionState;
-
+import nroth.trafficSimulator.ConfigReader.Config;
 
 class JunctionControllerTest {
 
 	private JunctionController controller;
-	private Map<String, Integer> config;
+	private Config config;
 
 	@BeforeEach
 	public void setUp() {
-		config = new HashMap<>();
-			config.put("S", 10); // time for car to pass
-			config.put("A1", 2);
-			config.put("A2", 3);
-			config.put("A3", 4);
-			config.put("A4", 5);
-			config.put("X1", 7); // NS_GREEN phase length
-			config.put("X2", 8); // EW_GREEN phase length
+
+
+		config = new Config(
+			7,
+			8,
+			10,
+			2,
+			3,
+			4, 
+			5);
 
 		controller = new JunctionController(config);
 	}
@@ -38,7 +36,7 @@ class JunctionControllerTest {
 		//default is phase1
 		JunctionController.JunctionPhase phase = controller.new JunctionPhase();
 		assertEquals("NS_GREEN", phase.phase.name());
-		assertEquals(config.get("X1").intValue(), phase.len);
+		assertEquals(config.X1(), phase.len);
 		assertEquals(0, phase.phaseTimer);
 		assertEquals(0, phase.carsPassed);
 		assertEquals(0, phase.carsOnRoad);
@@ -58,7 +56,7 @@ class JunctionControllerTest {
 		assertEquals(0, phase.carsPassed);
 		assertEquals(0, phase.carsOnRoad);
 		// After switching, len should update to X2
-		assertEquals(config.get("X2").intValue(), phase.len);
+		assertEquals(config.X2(), phase.len);
 	}
 
 	@Test
@@ -99,7 +97,7 @@ class JunctionControllerTest {
 		Road[] roads = controller.getRoads();
 		assertNotNull(roads);
 		assertEquals(4, roads.length);
-		Map<String, Integer> cfg = controller.getConfig();
+		Config cfg = controller.getConfig();
 		assertNotNull(cfg);
 		assertEquals(config, cfg);
 	}
@@ -127,18 +125,21 @@ class JunctionControllerTest {
 	@Test
 	void testTickCarArrivals() throws Exception {
 		// Roads should all already be clear
-		Road[] roads = controller.getRoads();
-		
+		var roads = controller.getJunctionState().roadQueues();
+		assertEquals(0, roads.get("Total"));
+
 		// Simulate ticks and check arrivals
 		for (int t = 1; t <= 12; t++) {
 			controller.tick();
 		}
+		
+		roads = controller.getJunctionState().roadQueues();
 		// After 12 ticks, check that cars have arrived according to config
 		// A1=2, A2=3, A3=4, A4=5
-		assertEquals(6, roads[0].getQueueLen()); // 12/2 = 6
-		assertEquals(4, roads[1].getQueueLen()); // 12/3 = 4
-		assertEquals(3, roads[2].getQueueLen()); // 12/4 = 3
-		assertEquals(2, roads[3].getQueueLen()); // 12/5 = 2
+		assertEquals(6, roads.get("North")); // 12/2 = 6
+		assertEquals(4, roads.get("East")); // 12/3 = 4
+		assertEquals(3, roads.get("South")); // 12/4 = 3
+		assertEquals(2, roads.get("West")); // 12/5 = 2
 	}
 
 	@Test
