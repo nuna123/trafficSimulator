@@ -81,6 +81,7 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 
 ---
 ## Code Overview
+![UML Class Diagram](design/trafficSimulatorUMLActivity.png)
 
 ### Technologies Used
 
@@ -131,6 +132,9 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 
 ### Key Classes
 
+![UML Class Diagram](design/UMLClassDiagram.png)
+
+
 **App**
 	Application entry point.
 	Loads config, initializes  `JunctionController`,  and calls `start()` to begin the tick loop
@@ -160,11 +164,11 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 
 * **Per‑road arrival rates:** individual roads can be disabled with `-1`.
 
-* **SLF4J logging** at INFO and DEBUG levels.
+* **SLF4J logging** at INFO, DEBUG and WARNING levels.
 
-* **Graceful shutdown hook** prints a full junction summary on exit.
+* **Shutdown hook** prints a full junction summary on exit.
 
-* **Animation** prints a representation of the junction on separate terminal using Lanterna library [https://code.google.com/archive/p/lanterna/]
+* **Animation** prints a representation of the junction on separate terminal using Lanterna library
 ---
 
 ## Code Logic
@@ -188,7 +192,7 @@ The nth car (`xn`) will take `S + (n - 1)` seconds to pass.
 ---
 ## Code Examples
 
-#### Running a 2‑minute simulation and injecting traffic manually
+#### Setting up roads manuallywith cars, and running a 2‑minute simulation
 
 ```java
 
