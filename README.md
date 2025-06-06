@@ -2,7 +2,7 @@
 # Traffic Intersection Simulator
 
 Java application that simulates a four‑way traffic‑light junction. Cars arrive at user‑defined intervals, traffic phases switch automatically, and information is logged in real time.
-The application cycles between 2 phases: 
+The application cycles between 2 phases:
 	NS_GREEN (Phase A): North ↔ South car movement
 	EW_GREEN (Phase B): East ↔ West car movement
 
@@ -47,7 +47,7 @@ Example console output:
 [3s]	 East: Car [1AA1186] Arrived
 [4s]	 West: Car [1AA3198] Arrived
 [5s]		  --------Phase switch!-----------------
-		last phase overview: 
+		last phase overview:
 				Phase: NS_GREEN; len: 5; timer: 5; carsPassed: 0; carsOnRoad: 0
 		New phase: EW_GREEN
 		Car Queues:	  N [0] ; E [2] ; S [1] ; W :[1]
@@ -81,6 +81,14 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 
 ---
 ## Code Overview
+
+### Technologies Used
+
+- **Gradle** [https://gradle.org/] – Build automation tool used for compiling, testing, and running the application.
+
+- **Logback & SLF4J** [http://logback.qos.ch/] [https://www.slf4j.org/] – Java logging framework used via SLF4J to log events.
+
+- **Lanterna** [https://github.com/mabe02/lanterna] – Terminal UI library for displaying the animated traffic grid in a separate console.
 
 ### Assumptions
 - Cars may cross only during their designated green light phase.
@@ -123,21 +131,24 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 
 ### Key Classes
 
-**App** 
+**App**
 	Application entry point.
 	Loads config, initializes  `JunctionController`,  and calls `start()` to begin the tick loop
 
 **ConfigReader**
-	Reads `config.properties`, validates mandatory keys and value ranges, and exposes an immutable `Map<String,Integer>`. 
+	Reads `config.properties`, validates mandatory keys and value ranges, and exposes an immutable `Map<String,Integer>`.
 
 **JunctionController**
-	Coordinates the entire simulation: maintains the current `JunctionPhase`, schedules a 1‑second tick with `ScheduledExecutorService`, handles car arrivals, and logs events. Contains nested `JunctionPhase` (state machine for light cycles). 
+	Coordinates the entire simulation: maintains the current `JunctionPhase`, schedules a 1‑second tick with `ScheduledExecutorService`, handles car arrivals, and logs events. Contains nested `JunctionPhase` (state machine for light cycles).
 
 **Road**
-	Manages a queue of `Car` objects for one compass direction, advancing positions when the light is green and removing cars that have cleared the junction. 
+	Manages a queue of `Car` objects for one compass direction, advancing positions when the light is green and removing cars that have cleared the junction.
 
 **Car**
-	Simple class representing a vehicle. Holds its plate (randomly generated), length, crossing time, and position relative to the junction. 
+	Simple class representing a vehicle. Holds its plate (randomly generated), length, crossing time, and position relative to the junction.
+
+**Animator**
+	Handles animation. runs with every `JunctionController.tick()`, extracts information from it's state, calculates car position on a grid and plots it. Uses a separate `colorMap`, a grid that plots only colored coordinates, and merges during printing.
 
 ---
 
@@ -152,6 +163,8 @@ Note: `A[1-4]` may be set to -1 to disable road arrivals
 * **SLF4J logging** at INFO and DEBUG levels.
 
 * **Graceful shutdown hook** prints a full junction summary on exit.
+
+* **Animation** prints a representation of the junction on separate terminal using Lanterna library [https://code.google.com/archive/p/lanterna/]
 ---
 
 ## Code Logic
@@ -204,19 +217,8 @@ Unit tests are implemented with JUnit5. run them with:
 ```
 ---
 
-## Tests
-
-Unit tests are implemented with JUnit5. run them with:
-
-```bash
-./gradlew test
-```
----
-
 ## Possible future features
 
- - **Animation**
- 	This would help visualize the car movement across the junction.
  - **Variable vhicle length**
 	Introduce trucks that are different length than cars and therefore take longer to cross can be implemented
  - **Randomized parameters**

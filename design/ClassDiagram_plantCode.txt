@@ -1,108 +1,158 @@
-' -	private field
-' +	public field
-
-'  UML Relationships:
-'  Road --> Car : contains cars in queue
-'  JunctionController --> Road : manages multiple roads
-'  JunctionController --> JunctionPhase : owns traffic phase logic
-'  JunctionPhase --> PhaseValue : uses enum for signal state
-
 @startuml
-
-
 class Car {
-	- static final int MIN_ID;
-	- static final int MAX_ID;
-	- final static Random _random;
-	+ final int length;
-	+ final int crossingTime;
-	+ final String plate;
-	+ float posInJunction;
-
-	- String generatePlate()
-	+ Car (int len, float position, int secToCross)
-	+ String toString()
+  - static final int MIN_ID
+  - static final int MAX_ID
+  - static final Random RANDOM
+  + int length
+  + int crossingTime
+  + String plate
+  + float posInJunction
+  - String generatePlate()
+  + Car(int len, float position, int secToCross)
+  + String toString()
 }
 
 class Road {
-	- final int _S;
-	- final String _roadName;
-	- final Queue<Car> _carsQueue;
-
-	+ Road(int S, String roadname)
-	+ Car addCar()
-	+ Car addCar(int carLength)
-	+ int getQueueLen()
-	+ Queue<Car> getQueue()
-	+ Map<String, Integer> greenLight_tick(int secInLight)
-	+ String toString()
+  - final int _carCrossingTime
+  - final String _roadName
+  - final Queue<Car> _waitingCarsQueue
+  - final Queue<Car> _carsOnRoad
+  - final Queue<Car> _passedCarsQueue
+  + Road(int S, String roadname)
+  + Car addCar()
+  + Car addCar(int carLength)
+  + int getQueueLen()
+  + Queue<Car> getRoadCars()
+  + Queue<Car> getWaitingCars()
+  + Queue<Car> getPassedCars()
+  + void advancePassedCars()
+  + void updateWaitingCars()
+  + int advanceCarsOnRoad()
+  + Map<String, Integer> greenLight_tick(int secInLight)
+  + String toString()
 }
 
 class JunctionController {
-
-	- final Map<String, Integer> _config;
-	- final int[] _carArrivals;
-	- final Road[] _roads;
-	- final JunctionPhase _currentPhase;
-	- final Object threadLock;
-	- static final Logger _logger;
-	- int _totalCarsPassed;
-	- static int _elapsedTime;
-
-	- void switchPhase ()
-	+ Road[] getRoads()
-	+ Map<String, Integer> getConfig()
-	+ JunctionPhase getPhase()
-	+ JunctionController(Map<String, Integer> config)
-	+ void addCar(char roadChar)
-	+ void addCar(char roadChar, int carNum)
-	+ Map<String, Object> getJunctionState()
-	+ String summary()
-	+ static void log (String msg)
-	+ static void log (String msg, String style)
-	+ static void printDebug (String msg)
-	+ void tick()
-	+ void start(int timeLimit_sec)
-}
-
-enum PhaseValue {
-	NS_GREEN
-	EW_GREEN
+  - final Config _config
+  - final int[] _carArrivals
+  - final Road[] _roads
+  - final JunctionPhase _currentPhase
+  - final Object threadLock
+  - static final Logger _logger
+  - int _totalCarsPassed
+  - static int _elapsedTime
+  + Road[] getRoads()
+  + Config getConfig()
+  + JunctionPhase getPhase()
+  + JunctionController(Config config)
+  + void addCar(char roadChar)
+  + void addCar(char roadChar, int carNum)
+  + JunctionState getJunctionState()
+  + String summary()
+  + static void log(String msg)
+  + static void log(String msg, String style)
+  + static void printDebug(String msg)
+  + static void printWarning(String msg)
+  + void tick()
+  + void start(int timeLimit_sec)
+  - void switchPhase()
 }
 
 class JunctionPhase {
-	+ PhaseValue phase;
-	+ int len;
-	+ int phaseTimer;
-	+ int carsPassed;
-	+ int carsOnRoad;
+  + PhaseValue phase
+  + int len
+  + int phaseTimer
+  + int carsPassed
+  + int carsOnRoad
+  - int getPhaseLen()
+  + void resetPhase()
+  + JunctionPhase()
+  + void switchPhase()
+  + void update(Map<String, Integer> road1, Map<String, Integer> road2)
+  + String toString()
+}
 
-	- int getPhaseLen()
-	+ void resetPhase()
-	+ JunctionPhase()
-	+ void switchPhase()
-	+ void update(Map<String, Integer> road1, Map<String, Integer> road2)
-	+ String toString()
+class JunctionState {
+  + String currentPhase
+  + Integer elapsedTime
+  + Integer carsOnRoad
+  + Integer totalCarsPassed
+  + Map<String, Integer> roadQueues
+}
+
+enum PhaseValue {
+  NS_GREEN
+  EW_GREEN
 }
 
 class ConfigReader {
-	- String _filePath
-	- Map<String, Integer> _mappedConfig
-	- static List<String> _requiredKeys
+  - String _filePath
+  - Map<String, Integer> _mappedConfig
+  - static List<String> _requiredKeys
+  - void validateValues(Map<String, Integer> config)
+  - Map<String, Integer> propertiesToMap(Properties properties)
+  + String getFilePath()
+  + Map<String, Integer> getMappedConfig()
+  + List<String> getRequiredKeys()
+  + ConfigReader(String path)
+  + Config readConfigFile()
+}
 
-	- void validateValues (Map<String, Integer> config)
-	- Map<String, Integer> propertiesToMap(Properties properties)
-	+ String getFilePath ()
-	+ Map<String, Integer> getMappedConfig ()
-	+ List<String> getRequiredKeys ()
-	+ ConfigReader(String path)
-	+ Map<String, Integer> readConfigFile()
+class Config <<record>>{
+  + int X1()
+  + int X2()
+  + int S()
+  + int A1()
+  + int A2()
+  + int A3()
+  + int A4()
+}
 
+class Animator {
+  - Terminal _terminal
+  - TextGraphics textGraphics
+  + Animator()
+  + void shutdown()
+  + JunctionMap printFrame(JunctionController jc)
+  - void printOnTerminal(JunctionMap jm, String messageString)
+}
+
+class JunctionMap {
+  - String[] mapStringArr
+  - String[] colorMap
+  + JunctionMap()
+  + void addTitles(int[] carQueues)
+  + void addChar(char c, int[] pos)
+  + void addCar(int[] pos)
+  + void addToColorMap(int[] pos, int dirIdx)
+  + static int[] CarPositionCalculator(Car car, int directionIndex)
+  + void addCarsToDirection(int dirIdx, LinkedList<Car> allCars)
+  + void printWithColor()
+}
+
+class constants {
+  + int[][] LANE_PNT_ZERO
+  + int LANE_SIZE_Y
+  + int LANE_SIZE_X
+  + char CAR_CHAR
+  + int[][] MAP_LIMS
+  + int[][] TITLE_POS
+  + TextColor.ANSI ANSI_WHITE
+  + TextColor.ANSI[] ANSI_COLOR_ARR
+  + String STR_WHITE
+  + String[] STR_COLOR_ARR
+  + String[] MAP_STR
 }
 
 ' Relationships
-Road --> Car : contains
 JunctionController --> Road : contains
 JunctionController --> JunctionPhase : contains
+JunctionController --> JunctionState : uses
 JunctionPhase --> PhaseValue : uses
+Road --> Car : contains
+Animator --> JunctionMap : uses
+JunctionMap --> Car : uses
+constants .. Animator : static
+ConfigReader --> Config : returns
+JunctionController --> Config : uses
 @enduml
