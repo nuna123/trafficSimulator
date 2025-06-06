@@ -158,10 +158,10 @@ public class Road {
 
 	@Override
 	public String toString() {
-		Iterator<Car> it = _waitingCarsQueue.iterator();
+		var it = _waitingCarsQueue.iterator();
+		var  idx = 0;
+		var out = "";
 		Car currCar;
-		int idx = 0;
-		String out = "";
 		out += "%s: ".formatted(_roadName);
 		if (!it.hasNext())
 			out += "[No Cars]";

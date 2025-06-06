@@ -107,7 +107,7 @@ public class JunctionController {
 
 	public JunctionState getJunctionState() {
 
-		JunctionState junctionState = new JunctionState(
+		var junctionState = new JunctionState(
 			_currentPhase.phase.name(),
 			_elapsedTime,
 			_currentPhase.carsOnRoad,
@@ -129,8 +129,8 @@ public class JunctionController {
 	 * @return
 	 */
 	public String summary() {
-		JunctionState js = getJunctionState();
-		Map<String, Integer> queues = js.roadQueues();
+		var js = getJunctionState();
+		var queues = js.roadQueues();
 
 		return String.format(
 			"\n---- JUNCTION SUMMARY ----\n" +
@@ -250,12 +250,10 @@ public class JunctionController {
 	public void tick() {
 		_elapsedTime++;
 
-		Map<String, Integer> res1;
-		Map<String, Integer> res2;
 
 		int roadOffset = (_currentPhase.phase == PhaseValue.NS_GREEN ? 0 : 1);
-		res1 = _roads[0 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
-		res2 = _roads[2 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+		var res1 = _roads[0 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
+		var res2 = _roads[2 + roadOffset].greenLight_tick(_currentPhase.len - _currentPhase.phaseTimer);
 		roadOffset = (roadOffset == 1 ? 0 : 1);
 		_roads[0 + roadOffset].advancePassedCars();
 		_roads[2 + roadOffset].advancePassedCars();

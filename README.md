@@ -217,10 +217,12 @@ Unit tests are implemented with JUnit5. run them with:
 ```
 ---
 
-## Possible future features
+## Possible future additions
 
+- **Real-time user controlled car arrival**
+	Button or port for user to send input into the program.
  - **Variable vhicle length**
-	Introduce trucks that are different length than cars and therefore take longer to cross can be implemented
+	Introduce trucks that are different length than cars and take longer to cross can be implemented
  - **Randomized parameters**
 	To make the simulation more realistic, slight randomness values can be implemented. (eg. car speed, arrival rate)
  -  **Car autonomy**

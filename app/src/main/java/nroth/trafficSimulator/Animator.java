@@ -1,14 +1,13 @@
 package nroth.trafficSimulator;
 
-import java.util.LinkedList;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.LinkedList;
 
-import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
 
 /**
  * Animator - controlls the animation of the junction
@@ -370,7 +369,7 @@ public class Animator {
 	{
 		JunctionMap newMap = new JunctionMap();
 		//figure out what cars are on the road, and which are waiting in queue
-		int[] carQueues = {0,0,0,0};
+		var carQueues = new int[]{0,0,0,0};
 		LinkedList<Car> allCars;
 
 		var jc_state = jc.getJunctionState();
@@ -382,7 +381,7 @@ public class Animator {
 		for (int i = 0; i < 4; i++)
 		{
 			carQueues[i] = jc.getRoads()[i].getQueueLen();
-			Iterator<Car> counter = jc.getRoads()[i].getWaitingCars().iterator();
+			var counter = jc.getRoads()[i].getWaitingCars().iterator();
 			//Max of 5 cars are added to list. no point ading more bc they wont be printed
 			allCars = new LinkedList<>();
 			while (allCars.size() < 5 && counter.hasNext())
